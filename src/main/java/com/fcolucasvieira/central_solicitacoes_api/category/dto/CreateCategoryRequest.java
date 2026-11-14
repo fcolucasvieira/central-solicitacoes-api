@@ -1,4 +1,9 @@
 package com.fcolucasvieira.central_solicitacoes_api.category.dto;
 
-public record CreateCategoryRequest() {
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateCategoryRequest(
+        @NotBlank
+        String name
+) {
 }
