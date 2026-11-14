@@ -1,12 +1,14 @@
 package com.fcolucasvieira.central_solicitacoes_api.category.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "categories")
+@Getter
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -20,4 +22,14 @@ public class Category {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
+
+    protected Category() {}
+
+    public Category(String name) {
+        this.name = name;
+    }
+
+    public void delete() {
+        this.active = false;
+    }
 }
