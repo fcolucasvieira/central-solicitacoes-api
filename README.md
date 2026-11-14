@@ -1,83 +1,166 @@
 # Central de Solicitações
 
-Aplicação web para gerenciamento de solicitações internas, permitindo registrar, consultar e acompanhar solicitações ao longo de seu processo de resolução.
+API para gerenciamento de solicitações internas, desenvolvida como parte do desafio técnico do processo seletivo da **Loading Desenvolvimento Jr.**
 
-O projeto está sendo desenvolvido como parte do desafio técnico da Loading Jr., com foco em organização, regras de negócio, persistência de dados e integração entre Back-End e Front-End.
+O projeto tem como objetivo centralizar o registro e o acompanhamento de solicitações, permitindo organizar demandas por categoria, prioridade e status, além de manter o histórico de suas alterações.
+
+> **Status:** Em desenvolvimento.
+
+---
+
+## Objetivo
+
+Construir uma aplicação para gerenciar solicitações internas de uma organização, substituindo controles informais por um fluxo estruturado e persistente.
+
+O fluxo principal de uma solicitação contempla três etapas:
+
+`ABERTA → EM_ANDAMENTO → CONCLUIDA`
+
+A aplicação deverá garantir que as transições respeitem essa sequência, evitando mudanças inválidas no estado das solicitações.
+
+---
 
 ## Tecnologias
 
-### Back-End
-- Java 25
-- Spring Boot 4
-- Spring Web MVC
-- Spring Data JPA
-- Spring Security
-- Hibernate
-- Bean Validation
-- Maven
-- Lombok
+| Categoria | Tecnologia |
+|---|---|
+| Linguagem | Java 25 |
+| Framework | Spring Boot 4 |
+| Persistência | Spring Data JPA / Hibernate |
+| Banco de dados | PostgreSQL 17 |
+| Versionamento do banco | Flyway |
+| Build | Maven |
+| Ambiente do banco | Docker Compose |
+| Front-End planejado | HTML, CSS e JavaScript |
 
-### Banco de dados e infraestrutura
-- PostgreSQL 17
-- Docker
-- Docker Compose
-- Flyway Migration
+---
 
-### Front-End
-- HTML
-- CSS
-- JavaScript
+## Arquitetura e organização
 
-## Pré-requisitos
+O Back-End utiliza uma organização modular orientada aos domínios da aplicação, agrupando componentes relacionados à mesma responsabilidade de negócio.
 
-Antes de executar o projeto, certifique-se de possuir:
+Estrutura geral:
 
-- JDK 25
-- Docker e Docker Compose
-- Git
+```text
+src/
+├── main/
+│   ├── java/
+│   │   └── com/fcolucasvieira/central_solicitacoes_api/
+│   │       ├── request/
+│   │       ├── category/
+│   │       └── user/
+│   │
+│   └── resources/
+│       ├── db/
+│       │   └── migration/
+│       └── application.yaml
+│
+└── test/
+```
+
+Os módulos representam as principais áreas do sistema:
+
+- **Request:** gerenciamento das solicitações, seus status e histórico.
+- **Category:** organização das categorias utilizadas pelas solicitações.
+- **User:** representação dos usuários do sistema.
+
+A estrutura busca manter as responsabilidades organizadas por domínio, facilitando a manutenção e a evolução da aplicação.
+
+---
+
+## Modelagem do banco de dados
+
+O modelo relacional foi estruturado para representar as principais entidades do domínio e preservar a integridade dos dados e dos relacionamentos.
+
+O diagrama abaixo apresenta o schema inicial da aplicação:
+
+![Diagrama do schema inicial do banco de dados](docs/initial_schema.png)
+
+As principais entidades são:
+
+- **Request:** representa uma solicitação, contendo título, descrição, categoria, prioridade e status atual.
+- **Category:** representa as categorias utilizadas para classificar as solicitações.
+- **User:** representa os usuários do sistema.
+- **RequestHistoryStatus:** registra os status alcançados por uma solicitação e o usuário responsável pela alteração.
+
+O histórico é mantido separadamente da solicitação, permitindo preservar os registros das mudanças de status ao longo do tempo.
+
+---
 
 ## Configuração e execução
 
-### 1. Clone o repositório
+### Pré-requisitos
 
-Clone o projeto e acesse seu diretório.
+- JDK 25;
+- Maven;
+- Docker e Docker Compose;
+- Git.
 
-### 2. Configure as variáveis de ambiente
+### 1. Clonar o repositório
 
-Na raiz do projeto, copie o arquivo `.env.example`, renomeando a cópia para `.env`.
+```bash
+git clone <URL_DO_REPOSITORIO>
+cd central-solicitacoes-api
+```
 
-Preencha as variáveis com as credenciais que serão utilizadas pelo PostgreSQL:
+### 2. Configurar as variáveis de ambiente
 
-| Variável | Descrição |
-|---|---|
-| `POSTGRES_DB` | Nome do banco de dados |
-| `POSTGRES_USER` | Usuário do banco |
-| `POSTGRES_PASSWORD` | Senha do banco |
+Crie um arquivo `.env` na raiz do projeto, seguindo o modelo disponível em `.env.example`.
 
-**Importante:** o arquivo `.env` contém informações locais e não deve ser enviado ao repositório.
+```env
+POSTGRES_DB=central_solicitacoes
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=sua_senha
+```
 
-### 3. Inicie o banco de dados
+### 3. Iniciar o banco de dados
 
-Com o Docker em execução, utilize o Docker Compose para iniciar o serviço PostgreSQL.
+```bash
+docker compose up -d
+```
 
-### 4. Execute a aplicação
+O PostgreSQL será iniciado em um container Docker, com persistência dos dados por meio de um volume nomeado.
 
-A aplicação pode ser iniciada pela IDE ou utilizando o Maven Wrapper disponibilizado no projeto.
+### 4. Executar a aplicação
 
-## Estrutura do projeto
+Com o banco de dados em execução, inicie a aplicação pela sua IDE ou utilizando o Maven:
 
-A organização do Back-End seguirá uma abordagem modular, agrupando componentes de acordo com seus respectivos domínios e responsabilidades.
+```bash
+./mvnw spring-boot:run
+```
 
-## Status do desenvolvimento
+No Windows:
 
-**Em desenvolvimento.**
+```bash
+mvnw.cmd spring-boot:run
+```
 
-Atualmente, o projeto possui a configuração inicial do ambiente de desenvolvimento e a integração com o PostgreSQL por meio do Docker Compose.
+As migrations do Flyway são responsáveis pelo versionamento e pela criação da estrutura do banco de dados.
 
-As funcionalidades da Central de Solicitações serão implementadas progressivamente, priorizando os requisitos obrigatórios do desafio.
+---
 
-## Observações
+## Funcionalidades
 
-- O banco de dados utiliza um volume Docker nomeado para persistência dos dados.
-- As configurações sensíveis são fornecidas por variáveis de ambiente.
-- O Flyway será responsável pelo versionamento e gerenciamento das alterações do esquema do banco de dados.
+O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
+
+- [x] Configuração do PostgreSQL com Docker Compose.
+- [x] Configuração de conexão com o banco por variáveis de ambiente.
+- [x] Versionamento do schema com Flyway.
+- [x] Modelagem inicial das entidades e relacionamentos.
+- [x] Definição dos enums de prioridade e status.
+- [ ] Cadastro e consulta de solicitações.
+- [ ] Filtros por status e prioridade.
+- [ ] Implementação das regras de transição de status.
+- [ ] Registro do histórico de alterações.
+- [ ] Testes automatizados.
+- [ ] Integração com a interface web.
+
+---
+
+## Autor
+
+**Lucas Vieira**:
+Estudante de Engenharia de Computação — UFC Sobral
+
+- GitHub: [github.com/fcolucasvieira](https://github.com/fcolucasvieira)
+- LinkedIn: [linkedin.com/in/fco-lucas-vieira](https://www.linkedin.com/in/fco-lucas-vieira/)
