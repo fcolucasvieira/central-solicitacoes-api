@@ -4,12 +4,14 @@ import com.fcolucasvieira.central_solicitacoes_api.category.entity.Category;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Priority;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Status;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "requests")
+@Getter
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,4 +37,13 @@ public class Request {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
+
+    protected Request() {}
+
+    public Request(String title, String description, Category category, Priority priority) {
+        this.title = title;
+        this.description = description;
+        this.category = category;
+        this.priority = priority;
+    }
 }
