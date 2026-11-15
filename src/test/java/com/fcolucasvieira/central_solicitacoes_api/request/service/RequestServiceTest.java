@@ -17,7 +17,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -100,7 +106,6 @@ class RequestServiceTest {
     @Nested
     @DisplayName("Busca de Solicitação por ID")
     class FindRequestByIdTests {
-
         @Test
         @DisplayName("Deve retornar a solicitação correspondente quando o ID existir")
         void shouldReturnRequestWhenIdExists() {
@@ -135,6 +140,65 @@ class RequestServiceTest {
 
             assertEquals("Not Found (404): Solicitação não encontrada.", exception.getMessage());
             verify(requestRepository, times(1)).findById(requestId);
+        }
+    }
+
+    @Nested
+    @DisplayName("Listagem de Solicitações com Filtros")
+    class FindAllRequestsTests {
+        @Test
+        @DisplayName("Deve listar solicitações com paginação e filtros com sucesso")
+        void shouldReturnPagedRequestsWithFilters() {
+            Category category = new Category("TI");
+            Request request1 = new Request("Monitor piscando", "Monitor do lab 1", category, Priority.MEDIA);
+            Request request2 = new Request("Teclado quebrado", "Teclado do lab 2", category, Priority.BAIXA);
+            List<Request> requests = List.of(request1, request2);
+
+            Pageable expectedPageable = PageRequest.of(0, 10);
+            Page<Request> requestPage = new PageImpl<>(requests, expectedPageable, requests.size());
+
+            when(requestRepository.findAll(any(Specification.class), eq(expectedPageable))).thenReturn(requestPage);
+
+            Page<RequestResponse> result = service.findAll(
+                    Status.ABERTA,
+                    Priority.MEDIA,
+                    category.getId(),
+                    "Monitor",
+                    1,
+                    10
+            );
+
+            assertNotNull(result);
+            assertEquals(2, result.getTotalElements());
+            assertEquals(2, result.getContent().size());
+            assertEquals("Monitor piscando", result.getContent().get(0).title());
+            assertEquals("Teclado quebrado", result.getContent().get(1).title());
+
+            verify(requestRepository, times(1)).findAll(any(Specification.class), eq(expectedPageable));
+        }
+
+        @Test
+        @DisplayName("Deve normalizar valores de página e tamanho menores que o limite permitido")
+        void shouldNormalizeNegativeOrZeroPageAndSize() {
+            Pageable normalizedPageable = PageRequest.of(0, 1);
+            when(requestRepository.findAll(any(Specification.class), eq(normalizedPageable))).thenReturn(Page.empty());
+
+            Page<RequestResponse> result = service.findAll(null, null, null, null, 0, 0);
+
+            assertNotNull(result);
+            verify(requestRepository, times(1)).findAll(any(Specification.class), eq(normalizedPageable));
+        }
+
+        @Test
+        @DisplayName("Deve limitar o tamanho máximo por página para 25 elementos")
+        void shouldClampMaxSizeTo25() {
+            Pageable clampedPageable = PageRequest.of(0, 25);
+            when(requestRepository.findAll(any(Specification.class), eq(clampedPageable))).thenReturn(Page.empty());
+
+            Page<RequestResponse> result = service.findAll(null, null, null, null, 1, 100);
+
+            assertNotNull(result);
+            verify(requestRepository, times(1)).findAll(any(Specification.class), eq(clampedPageable));
         }
     }
 }
