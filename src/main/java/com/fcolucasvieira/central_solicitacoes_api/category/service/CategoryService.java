@@ -4,6 +4,8 @@ import com.fcolucasvieira.central_solicitacoes_api.category.dto.CategoryResponse
 import com.fcolucasvieira.central_solicitacoes_api.category.dto.CreateCategoryRequest;
 import com.fcolucasvieira.central_solicitacoes_api.category.entity.Category;
 import com.fcolucasvieira.central_solicitacoes_api.category.repository.CategoryRepository;
+import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceAlreadyExistsException;
+import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +23,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponse create(CreateCategoryRequest request) {
         if (repository.existsByName(request.name())) {
-            throw new IllegalStateException("Conflict (409): Categoria já existe.");
+            throw new ResourceAlreadyExistsException("Categoria já cadastrada com o nome: " + request.name());
         }
 
         Category category = new Category(request.name());
@@ -34,7 +36,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponse findById(UUID id) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Categoria não existe."));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada para o ID informado: " + id));
 
         return CategoryResponse.from(category);
     }
@@ -53,7 +55,7 @@ public class CategoryService {
     @Transactional
     public void delete(UUID id) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found (401): Categoria não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada para o ID informado: " + id));
 
         category.delete();
     }
