@@ -166,6 +166,7 @@ O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
 - [x] Testes unitários para a camada de serviço do módulo de Categorias (`CategoryServiceTest`).
 - [x] Módulo de Solicitações (`request`): cadastro com status inicial `ABERTA`, consulta por ID, listagem paginada com filtros dinâmicos via Specifications e controle do fluxo de transição de status (`ABERTA → EM_ANDAMENTO → CONCLUIDA`).
 - [x] Testes unitários para a camada de serviço do módulo de Solicitações (`RequestServiceTest`).
+- [x] Tratamento global de exceções com `@RestControllerAdvice` e respostas padronizadas via `ProblemDetail` (RFC 7807).
 - [ ] Registro do histórico de alterações.
 - [ ] Integração com a interface web.
 

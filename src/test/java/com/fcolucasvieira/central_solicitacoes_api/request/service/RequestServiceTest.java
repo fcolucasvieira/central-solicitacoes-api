@@ -2,6 +2,8 @@ package com.fcolucasvieira.central_solicitacoes_api.request.service;
 
 import com.fcolucasvieira.central_solicitacoes_api.category.entity.Category;
 import com.fcolucasvieira.central_solicitacoes_api.category.repository.CategoryRepository;
+import com.fcolucasvieira.central_solicitacoes_api.exception.InvalidStatusTransitionException;
+import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceNotFoundException;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.CreateRequestRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestResponse;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.UpdateStatusRequest;
@@ -87,7 +89,7 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalArgumentException quando categoria não existir ou for inativa")
+        @DisplayName("Deve lançar ResourceNotFoundException quando categoria não existir ou for inativa")
         void shouldThrowExceptionWhenCategoryNotFound() {
             UUID categoryId = UUID.randomUUID();
             CreateRequestRequest requestDTO = new CreateRequestRequest(
@@ -99,12 +101,12 @@ class RequestServiceTest {
 
             when(categoryRepository.findByIdAndActiveIsTrue(categoryId)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
                     () -> service.create(requestDTO)
             );
 
-            assertEquals("Not Found (404): Categoria não encontrada.", exception.getMessage());
+            assertEquals("Categoria não encontrada para o ID informado: " + categoryId, exception.getMessage());
             verify(requestRepository, never()).save(any(Request.class));
         }
     }
@@ -135,17 +137,17 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalArgumentException quando solicitação não for encontrada")
+        @DisplayName("Deve lançar ResourceNotFoundException quando solicitação não for encontrada")
         void shouldThrowExceptionWhenRequestNotFound() {
             UUID requestId = UUID.randomUUID();
             when(requestRepository.findById(requestId)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
                     () -> service.findById(requestId)
             );
 
-            assertEquals("Not Found (404): Solicitação não encontrada.", exception.getMessage());
+            assertEquals("Solicitação não encontrada para o ID informado: " + requestId, exception.getMessage());
             verify(requestRepository, times(1)).findById(requestId);
         }
     }
@@ -252,7 +254,7 @@ class RequestServiceTest {
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalArgumentException ao tentar saltar de ABERTA direto para CONCLUIDA")
+        @DisplayName("Deve lançar InvalidStatusTransitionException ao tentar saltar de ABERTA direto para CONCLUIDA")
         void shouldThrowExceptionWhenSkippingFromAbertaToConcluida() {
             UUID requestId = UUID.randomUUID();
             Category category = new Category("TI");
@@ -261,18 +263,18 @@ class RequestServiceTest {
 
             when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            InvalidStatusTransitionException exception = assertThrows(
+                    InvalidStatusTransitionException.class,
                     () -> service.updateStatus(requestId, new UpdateStatusRequest(Status.CONCLUIDA))
             );
 
-            assertEquals("Conflict (409): Solicitação deve realizar transição de status de ABERTA para EM_ANDAMENTO.", exception.getMessage());
+            assertEquals("Solicitação deve realizar transição de status de ABERTA para EM_ANDAMENTO.", exception.getMessage());
             assertEquals(Status.ABERTA, request.getStatus());
             verify(requestRepository, times(1)).findById(requestId);
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalArgumentException ao tentar transição inválida em solicitação já CONCLUIDA")
+        @DisplayName("Deve lançar InvalidStatusTransitionException ao tentar transição inválida em solicitação já CONCLUIDA")
         void shouldThrowExceptionWhenUpdatingConcluidaRequest() {
             UUID requestId = UUID.randomUUID();
             Category category = new Category("TI");
@@ -283,28 +285,28 @@ class RequestServiceTest {
 
             when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            InvalidStatusTransitionException exception = assertThrows(
+                    InvalidStatusTransitionException.class,
                     () -> service.updateStatus(requestId, new UpdateStatusRequest(Status.EM_ANDAMENTO))
             );
 
-            assertEquals("Conflict (409): Não é possível realizar transição de status como CONCLUIDA.", exception.getMessage());
+            assertEquals("Não é possível realizar transição de status para solicitação já CONCLUIDA.", exception.getMessage());
             assertEquals(Status.CONCLUIDA, request.getStatus());
             verify(requestRepository, times(1)).findById(requestId);
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalArgumentException quando ID da solicitação não for encontrado")
+        @DisplayName("Deve lançar ResourceNotFoundException quando ID da solicitação não for encontrado")
         void shouldThrowExceptionWhenRequestNotFoundOnUpdateStatus() {
             UUID requestId = UUID.randomUUID();
             when(requestRepository.findById(requestId)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
                     () -> service.updateStatus(requestId, new UpdateStatusRequest(Status.EM_ANDAMENTO))
             );
 
-            assertEquals("Not Found (404): Solicitação não encontrada.", exception.getMessage());
+            assertEquals("Solicitação não encontrada para o ID informado: " + requestId, exception.getMessage());
             verify(requestRepository, times(1)).findById(requestId);
         }
     }

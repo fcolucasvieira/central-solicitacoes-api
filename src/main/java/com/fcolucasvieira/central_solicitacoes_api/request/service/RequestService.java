@@ -2,6 +2,7 @@ package com.fcolucasvieira.central_solicitacoes_api.request.service;
 
 import com.fcolucasvieira.central_solicitacoes_api.category.entity.Category;
 import com.fcolucasvieira.central_solicitacoes_api.category.repository.CategoryRepository;
+import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceNotFoundException;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.CreateRequestRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestResponse;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.UpdateStatusRequest;
@@ -31,7 +32,7 @@ public class RequestService {
     @Transactional
     public RequestResponse create(CreateRequestRequest request) {
         Category category = categoryRepository.findByIdAndActiveIsTrue(request.categoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Categoria não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada para o ID informado: " + request.categoryId()));
 
         Request req = new Request(request.title(), request.description(), category, request.priority());
 
@@ -43,7 +44,7 @@ public class RequestService {
     @Transactional(readOnly = true)
     public RequestResponse findById(UUID id) {
         Request request = requestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Solicitação não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada para o ID informado: " + id));
 
         return RequestResponse.from(request);
     }
@@ -75,7 +76,7 @@ public class RequestService {
     @Transactional
     public RequestResponse updateStatus(UUID id, UpdateStatusRequest request) {
         Request req = requestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Solicitação não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada para o ID informado: " + id));
 
         req.updateStatus(request.status());
 
