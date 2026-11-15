@@ -4,6 +4,8 @@ import com.fcolucasvieira.central_solicitacoes_api.category.dto.CategoryResponse
 import com.fcolucasvieira.central_solicitacoes_api.category.dto.CreateCategoryRequest;
 import com.fcolucasvieira.central_solicitacoes_api.category.entity.Category;
 import com.fcolucasvieira.central_solicitacoes_api.category.repository.CategoryRepository;
+import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceAlreadyExistsException;
+import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,14 +30,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CategoryService - Testes Unitários")
 class CategoryServiceTest {
+
     @Mock
     private CategoryRepository repository;
+
     @InjectMocks
     private CategoryService service;
 
     @Nested
     @DisplayName("Criação de Categoria")
     class CreateCategoryTests {
+
         @Test
         @DisplayName("Deve criar uma categoria com sucesso quando o nome for único")
         void shouldCreateCategorySuccessfully() {
@@ -56,17 +61,17 @@ class CategoryServiceTest {
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalStateException quando já existir categoria com o mesmo nome")
+        @DisplayName("Deve lançar ResourceAlreadyExistsException quando já existir categoria com o mesmo nome")
         void shouldThrowExceptionWhenCategoryAlreadyExists() {
             CreateCategoryRequest request = new CreateCategoryRequest("Infraestrutura");
             when(repository.existsByName("Infraestrutura")).thenReturn(true);
 
-            IllegalStateException exception = assertThrows(
-                    IllegalStateException.class,
+            ResourceAlreadyExistsException exception = assertThrows(
+                    ResourceAlreadyExistsException.class,
                     () -> service.create(request)
             );
 
-            assertEquals("Conflict (409): Categoria já existe.", exception.getMessage());
+            assertEquals("Categoria já cadastrada com o nome: Infraestrutura", exception.getMessage());
             verify(repository, never()).save(any(Category.class));
         }
     }
@@ -90,17 +95,17 @@ class CategoryServiceTest {
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalArgumentException quando o ID não for encontrado")
+        @DisplayName("Deve lançar ResourceNotFoundException quando o ID não for encontrado")
         void shouldThrowExceptionWhenIdDoesNotExist() {
             UUID categoryId = UUID.randomUUID();
             when(repository.findById(categoryId)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
                     () -> service.findById(categoryId)
             );
 
-            assertEquals("Not Found (404): Categoria não existe.", exception.getMessage());
+            assertEquals("Categoria não encontrada para o ID informado: " + categoryId, exception.getMessage());
             verify(repository, times(1)).findById(categoryId);
         }
     }
@@ -177,17 +182,17 @@ class CategoryServiceTest {
         }
 
         @Test
-        @DisplayName("Deve lançar IllegalArgumentException quando o ID da categoria não existir")
+        @DisplayName("Deve lançar ResourceNotFoundException quando o ID da categoria não existir")
         void shouldThrowExceptionWhenCategoryNotFound() {
             UUID categoryId = UUID.randomUUID();
             when(repository.findById(categoryId)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
                     () -> service.delete(categoryId)
             );
 
-            assertEquals("Not Found (401): Categoria não encontrada.", exception.getMessage());
+            assertEquals("Categoria não encontrada para o ID informado: " + categoryId, exception.getMessage());
             verify(repository, times(1)).findById(categoryId);
         }
     }
