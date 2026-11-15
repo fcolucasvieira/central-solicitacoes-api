@@ -104,7 +104,7 @@ class RequestServiceTest {
                     () -> service.create(requestDTO)
             );
 
-            assertEquals("Not Found (404): Categoria não existe.", exception.getMessage());
+            assertEquals("Not Found (404): Categoria não encontrada.", exception.getMessage());
             verify(requestRepository, never()).save(any(Request.class));
         }
     }
