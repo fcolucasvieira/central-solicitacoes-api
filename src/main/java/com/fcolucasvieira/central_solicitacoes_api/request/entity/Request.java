@@ -46,4 +46,23 @@ public class Request {
         this.category = category;
         this.priority = priority;
     }
+
+    public void updateStatus(Status status) {
+        switch (this.status) {
+            case ABERTA:
+                if (!status.equals(Status.EM_ANDAMENTO)) {
+                    throw new IllegalArgumentException("Conflict (409): Solicitação deve realizar transição de status de ABERTA para EM_ANDAMENTO.");
+                }
+                this.status = status;
+                break;
+            case EM_ANDAMENTO:
+                if (!status.equals(Status.CONCLUIDA)) {
+                    throw new IllegalArgumentException("Conflict (409): Solicitação deve realizar transição de status de EM_ANDAMENTO para CONCLUIDA.");
+                }
+                this.status = status;
+                break;
+            case CONCLUIDA:
+                throw new IllegalArgumentException("Conflict (409): Não é possível realizar transição de status como CONCLUIDA.");
+        }
+    }
 }
