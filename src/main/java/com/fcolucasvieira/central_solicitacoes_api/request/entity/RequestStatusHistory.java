@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "requests_status_history")
-public class RequestHistoryStatus {
+public class RequestStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
