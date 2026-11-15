@@ -148,7 +148,7 @@ Com a aplicação em execução, a documentação pode ser acessada em:
 - **Swagger UI:** `http://localhost:8080/swagger-ui/index.html` (ou `http://localhost:8080/swagger-ui.html`)
 - **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
 
-A documentação detalha esquemas de requisição/resposta, exemplos e códigos de status HTTP para todos os endpoints da API (incluindo o módulo de categorias).
+A documentação detalha esquemas de requisição/resposta, exemplos e códigos de status HTTP para todos os endpoints da API (categorias, solicitações, etc.).
 
 ---
 
@@ -164,8 +164,9 @@ O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
 - [x] Documentação interativa da API com Swagger / OpenAPI.
 - [x] Módulo de Categorias (`category`): criação, consulta por ID, listagem paginada e exclusão lógica.
 - [x] Testes unitários para a camada de serviço do módulo de Categorias (`CategoryServiceTest`).
-- [ ] Cadastro e consulta de solicitações.
-- [ ] Filtros por status e prioridade.
+- [x] Módulo de Solicitações (`request`): cadastro com status inicial `ABERTA` e consulta por ID.
+- [x] Testes unitários para a camada de serviço do módulo de Solicitações (`RequestServiceTest`).
+- [ ] Listagem de solicitações com filtros por status e prioridade.
 - [ ] Implementação das regras de transição de status.
 - [ ] Registro do histórico de alterações.
 - [ ] Integração com a interface web.
