@@ -2,6 +2,7 @@ package com.fcolucasvieira.central_solicitacoes_api.request.controller;
 
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.CreateRequestRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestResponse;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.UpdateStatusRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Priority;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Status;
 import com.fcolucasvieira.central_solicitacoes_api.request.service.RequestService;
@@ -73,6 +74,23 @@ public class RequestController {
             @RequestParam(defaultValue = "25") int size
     ) {
         Page<RequestResponse> response = service.findAll(status, priority, categoryId, title, page, size);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Atualizar status da solicitação", description = "Realiza a transição de status respeitando o fluxo obrigatório: ABERTA -> EM_ANDAMENTO -> CONCLUIDA.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos"),
+            @ApiResponse(responseCode = "404", description = "Solicitação não encontrada"),
+            @ApiResponse(responseCode = "409", description = "Transição de status inválida ou salto de etapas não permitido")
+    })
+    @PatchMapping("{id}/status")
+    public ResponseEntity<RequestResponse> updateStatus(
+            @Parameter(description = "ID da solicitação", example = "b72b6495-2d41-4770-bf7d-53c8ea4bc48f")
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateStatusRequest request) {
+        RequestResponse response = service.updateStatus(id, request);
 
         return ResponseEntity.ok(response);
     }

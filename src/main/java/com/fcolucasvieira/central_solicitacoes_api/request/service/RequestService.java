@@ -4,6 +4,7 @@ import com.fcolucasvieira.central_solicitacoes_api.category.entity.Category;
 import com.fcolucasvieira.central_solicitacoes_api.category.repository.CategoryRepository;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.CreateRequestRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestResponse;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.UpdateStatusRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.Request;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Priority;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Status;
@@ -30,13 +31,13 @@ public class RequestService {
     @Transactional
     public RequestResponse create(CreateRequestRequest request) {
         Category category = categoryRepository.findByIdAndActiveIsTrue(request.categoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Categoria não existe."));
+                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Categoria não encontrada."));
 
-        Request newRequest = new Request(request.title(), request.description(), category, request.priority());
+        Request req = new Request(request.title(), request.description(), category, request.priority());
 
-        requestRepository.save(newRequest);
+        requestRepository.save(req);
 
-        return RequestResponse.from(newRequest);
+        return RequestResponse.from(req);
     }
 
     @Transactional(readOnly = true)
@@ -69,5 +70,15 @@ public class RequestService {
 
         return requestRepository.findAll(spec, pageable)
                 .map(RequestResponse::from);
+    }
+
+    @Transactional
+    public RequestResponse updateStatus(UUID id, UpdateStatusRequest request) {
+        Request req = requestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Solicitação não encontrada."));
+
+        req.updateStatus(request.status());
+
+        return RequestResponse.from(req);
     }
 }
