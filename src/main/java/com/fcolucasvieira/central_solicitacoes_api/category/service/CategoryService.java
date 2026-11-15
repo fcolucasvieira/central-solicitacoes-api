@@ -21,12 +21,20 @@ public class CategoryService {
     @Transactional
     public CategoryResponse create(CreateCategoryRequest request) {
         if (repository.existsByName(request.name())) {
-            throw new IllegalStateException("Conflict (403): Categoria já existe.");
+            throw new IllegalStateException("Conflict (409): Categoria já existe.");
         }
 
         Category category = new Category(request.name());
 
         repository.save(category);
+
+        return CategoryResponse.from(category);
+    }
+
+    @Transactional(readOnly = true)
+    public CategoryResponse findById(UUID id) {
+        Category category = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not Found (404): Categoria não existe."));
 
         return CategoryResponse.from(category);
     }
@@ -45,7 +53,7 @@ public class CategoryService {
     @Transactional
     public void delete(UUID id) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not Found (401): Categoria não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Not Found (401): Categoria não encontrada."));
 
         category.delete();
     }
