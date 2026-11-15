@@ -139,6 +139,19 @@ As migrations do Flyway são responsáveis pelo versionamento e pela criação d
 
 ---
 
+## Documentação da API (Swagger / OpenAPI)
+
+A aplicação conta com documentação interativa gerada via **Springdoc OpenAPI (Swagger UI)**.
+
+Com a aplicação em execução, a documentação pode ser acessada em:
+
+- **Swagger UI:** `http://localhost:8080/swagger-ui/index.html` (ou `http://localhost:8080/swagger-ui.html`)
+- **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
+
+A documentação detalha esquemas de requisição/resposta, exemplos e códigos de status HTTP para todos os endpoints da API (incluindo o módulo de categorias).
+
+---
+
 ## Funcionalidades
 
 O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
@@ -148,11 +161,13 @@ O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
 - [x] Versionamento do schema com Flyway.
 - [x] Modelagem inicial das entidades e relacionamentos.
 - [x] Definição dos enums de prioridade e status.
+- [x] Documentação interativa da API com Swagger / OpenAPI.
+- [x] Módulo de Categorias (`category`): criação, consulta por ID, listagem paginada e exclusão lógica.
+- [x] Testes unitários para a camada de serviço do módulo de Categorias (`CategoryServiceTest`).
 - [ ] Cadastro e consulta de solicitações.
 - [ ] Filtros por status e prioridade.
 - [ ] Implementação das regras de transição de status.
 - [ ] Registro do histórico de alterações.
-- [ ] Testes automatizados.
 - [ ] Integração com a interface web.
 
 ---
