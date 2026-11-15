@@ -164,9 +164,8 @@ O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
 - [x] Documentação interativa da API com Swagger / OpenAPI.
 - [x] Módulo de Categorias (`category`): criação, consulta por ID, listagem paginada e exclusão lógica.
 - [x] Testes unitários para a camada de serviço do módulo de Categorias (`CategoryServiceTest`).
-- [x] Módulo de Solicitações (`request`): cadastro com status inicial `ABERTA`, consulta por ID e listagem paginada com filtros dinâmicos (status, prioridade, categoria e busca textual por título via Specifications).
+- [x] Módulo de Solicitações (`request`): cadastro com status inicial `ABERTA`, consulta por ID, listagem paginada com filtros dinâmicos via Specifications e controle do fluxo de transição de status (`ABERTA → EM_ANDAMENTO → CONCLUIDA`).
 - [x] Testes unitários para a camada de serviço do módulo de Solicitações (`RequestServiceTest`).
-- [ ] Implementação das regras de transição de status.
 - [ ] Registro do histórico de alterações.
 - [ ] Integração com a interface web.
 
