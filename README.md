@@ -46,6 +46,10 @@ src/
 ├── main/
 │   ├── java/
 │   │   └── com/fcolucasvieira/central_solicitacoes_api/
+│   │       ├── auth/
+│   │       ├── config/
+│   │       ├── exception/
+│   │       ├── jwt/
 │   │       ├── request/
 │   │       ├── category/
 │   │       └── user/
@@ -60,6 +64,10 @@ src/
 
 Os módulos representam as principais áreas do sistema:
 
+- **Auth:** registro e autenticação de usuários com geração de token JWT.
+- **Config:** configurações de segurança (Spring Security) e documentação (Swagger/OpenAPI).
+- **Exception:** tratamento global de exceções com respostas padronizadas.
+- **JWT:** serviço de geração e validação de tokens e filtro de autenticação por requisição.
 - **Request:** gerenciamento das solicitações, seus status e histórico.
 - **Category:** organização das categorias utilizadas pelas solicitações.
 - **User:** representação dos usuários do sistema.
@@ -111,7 +119,13 @@ Crie um arquivo `.env` na raiz do projeto, seguindo o modelo disponível em `.en
 POSTGRES_DB=central_solicitacoes
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=sua_senha
+
+JWT_SECRET_KEY=sua_chave_secreta_com_no_minimo_32_caracteres
+EXPIRATION_MS=86400000
+JWT_ISSUER=central-solicitacoes-api
 ```
+
+> A chave `JWT_SECRET_KEY` deve ter no mínimo 32 caracteres para garantir a segurança da assinatura HMAC-SHA256.
 
 ### 3. Iniciar o banco de dados
 
@@ -148,7 +162,18 @@ Com a aplicação em execução, a documentação pode ser acessada em:
 - **Swagger UI:** `http://localhost:8080/swagger-ui/index.html` (ou `http://localhost:8080/swagger-ui.html`)
 - **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
 
-A documentação detalha esquemas de requisição/resposta, exemplos e códigos de status HTTP para todos os endpoints da API (categorias, solicitações, etc.).
+A documentação detalha esquemas de requisição/resposta, exemplos e códigos de status HTTP para todos os endpoints da API (autenticação, categorias, solicitações, etc.).
+
+### Autenticação no Swagger UI
+
+Os endpoints protegidos exigem um token JWT. Para autenticar no Swagger UI:
+
+1. Use `POST /auth/register` ou `POST /auth/login` para obter um token.
+2. Clique no botão **Authorize 🔒** no topo da página.
+3. No campo **Value**, informe: `<seu_token_jwt>` (sem o prefixo `Bearer`).
+4. Clique em **Authorize** e feche o modal.
+
+Todos os endpoints protegidos passarão a enviar o header `Authorization: Bearer <token>` automaticamente.
 
 ---
 
@@ -167,6 +192,8 @@ O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
 - [x] Módulo de Solicitações (`request`): cadastro com status inicial `ABERTA`, consulta por ID, listagem paginada com filtros dinâmicos via Specifications e controle do fluxo de transição de status (`ABERTA → EM_ANDAMENTO → CONCLUIDA`).
 - [x] Testes unitários para a camada de serviço do módulo de Solicitações (`RequestServiceTest`).
 - [x] Tratamento global de exceções com `@RestControllerAdvice` e respostas padronizadas via `ProblemDetail` (RFC 7807).
+- [x] Módulo de autenticação (`auth`): registro de usuário e login com geração de token JWT (JJWT + Spring Security).
+- [x] Endpoints protegidos por autenticação Bearer Token (JWT stateless via `JwtAuthenticationFilter`).
 - [ ] Registro do histórico de alterações.
 - [ ] Integração com a interface web.
 
