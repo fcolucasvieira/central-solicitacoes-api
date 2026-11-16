@@ -14,3 +14,10 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+
+app:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration-ms: ${EXPIRATION_MS}
+      issuer: ${JWT_ISSUER}
