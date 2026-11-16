@@ -1,14 +1,13 @@
 package com.fcolucasvieira.central_solicitacoes_api.jwt;
 
-import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceNotFoundException;
 import com.fcolucasvieira.central_solicitacoes_api.user.entity.User;
 import com.fcolucasvieira.central_solicitacoes_api.user.repository.UserRepository;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -47,7 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+            log.warn("Token inválido: {}", ex.getMessage());
+        }
 
         filterChain.doFilter(request, response);
     }
