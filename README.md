@@ -194,7 +194,7 @@ O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
 - [x] Tratamento global de exceções com `@RestControllerAdvice` e respostas padronizadas via `ProblemDetail` (RFC 7807).
 - [x] Módulo de autenticação (`auth`): registro de usuário e login com geração de token JWT (JJWT + Spring Security).
 - [x] Endpoints protegidos por autenticação Bearer Token (JWT stateless via `JwtAuthenticationFilter`).
-- [ ] Registro do histórico de alterações.
+- [x] Histórico de status das solicitações (`requests_status_history`): registro automático do usuário autenticado e do status em cada criação e transição, com endpoint de consulta cronológica `GET /requests/{id}/history`.
 - [ ] Integração com a interface web.
 
 ---
