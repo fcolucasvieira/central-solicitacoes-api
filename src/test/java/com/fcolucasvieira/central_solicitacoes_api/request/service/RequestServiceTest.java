@@ -6,12 +6,17 @@ import com.fcolucasvieira.central_solicitacoes_api.exception.InvalidStatusTransi
 import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceNotFoundException;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.CreateRequestRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestResponse;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestStatusHistoryResponse;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.UpdateStatusRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.Request;
+import com.fcolucasvieira.central_solicitacoes_api.request.entity.RequestStatusHistory;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Priority;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Status;
 import com.fcolucasvieira.central_solicitacoes_api.request.repository.RequestRepository;
 import com.fcolucasvieira.central_solicitacoes_api.request.repository.RequestStatusHistoryRepository;
+import com.fcolucasvieira.central_solicitacoes_api.user.entity.User;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,6 +30,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +56,20 @@ class RequestServiceTest {
 
     @InjectMocks
     private RequestService service;
+
+    private User authenticatedUser;
+
+    @BeforeEach
+    void setUp() {
+        authenticatedUser = new User("Lucas Vieira", "lucas@email.com", "hash");
+        var auth = new UsernamePasswordAuthenticationToken(authenticatedUser, null, authenticatedUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Nested
     @DisplayName("Criação de Solicitação")
@@ -86,6 +107,13 @@ class RequestServiceTest {
             assertEquals(category, savedRequest.getCategory());
             assertEquals(Priority.ALTA, savedRequest.getPriority());
             assertEquals(Status.ABERTA, savedRequest.getStatus());
+
+            ArgumentCaptor<RequestStatusHistory> historyCaptor = ArgumentCaptor.forClass(RequestStatusHistory.class);
+            verify(historyRepository, times(1)).save(historyCaptor.capture());
+
+            RequestStatusHistory savedHistory = historyCaptor.getValue();
+            assertEquals(Status.ABERTA, savedHistory.getStatus());
+            assertEquals(authenticatedUser, savedHistory.getChangedBy());
         }
 
         @Test
@@ -108,6 +136,7 @@ class RequestServiceTest {
 
             assertEquals("Categoria não encontrada para o ID informado: " + categoryId, exception.getMessage());
             verify(requestRepository, never()).save(any(Request.class));
+            verify(historyRepository, never()).save(any(RequestStatusHistory.class));
         }
     }
 
@@ -232,6 +261,13 @@ class RequestServiceTest {
             assertEquals(Status.EM_ANDAMENTO, response.status());
             assertEquals(Status.EM_ANDAMENTO, request.getStatus());
             verify(requestRepository, times(1)).findById(requestId);
+
+            ArgumentCaptor<RequestStatusHistory> historyCaptor = ArgumentCaptor.forClass(RequestStatusHistory.class);
+            verify(historyRepository, times(1)).save(historyCaptor.capture());
+
+            RequestStatusHistory savedHistory = historyCaptor.getValue();
+            assertEquals(Status.EM_ANDAMENTO, savedHistory.getStatus());
+            assertEquals(authenticatedUser, savedHistory.getChangedBy());
         }
 
         @Test
@@ -251,6 +287,13 @@ class RequestServiceTest {
             assertEquals(Status.CONCLUIDA, response.status());
             assertEquals(Status.CONCLUIDA, request.getStatus());
             verify(requestRepository, times(1)).findById(requestId);
+
+            ArgumentCaptor<RequestStatusHistory> historyCaptor = ArgumentCaptor.forClass(RequestStatusHistory.class);
+            verify(historyRepository, times(1)).save(historyCaptor.capture());
+
+            RequestStatusHistory savedHistory = historyCaptor.getValue();
+            assertEquals(Status.CONCLUIDA, savedHistory.getStatus());
+            assertEquals(authenticatedUser, savedHistory.getChangedBy());
         }
 
         @Test
@@ -271,6 +314,7 @@ class RequestServiceTest {
             assertEquals("Solicitação deve realizar transição de status de ABERTA para EM_ANDAMENTO.", exception.getMessage());
             assertEquals(Status.ABERTA, request.getStatus());
             verify(requestRepository, times(1)).findById(requestId);
+            verify(historyRepository, never()).save(any(RequestStatusHistory.class));
         }
 
         @Test
@@ -293,6 +337,7 @@ class RequestServiceTest {
             assertEquals("Não é possível realizar transição de status para solicitação já CONCLUIDA.", exception.getMessage());
             assertEquals(Status.CONCLUIDA, request.getStatus());
             verify(requestRepository, times(1)).findById(requestId);
+            verify(historyRepository, never()).save(any(RequestStatusHistory.class));
         }
 
         @Test
@@ -308,6 +353,50 @@ class RequestServiceTest {
 
             assertEquals("Solicitação não encontrada para o ID informado: " + requestId, exception.getMessage());
             verify(requestRepository, times(1)).findById(requestId);
+            verify(historyRepository, never()).save(any(RequestStatusHistory.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Consulta de Histórico de Status")
+    class FindHistoryByRequestIdTests {
+
+        @Test
+        @DisplayName("Deve retornar o histórico de status em ordem cronológica quando solicitação existir")
+        void shouldReturnHistoryWhenRequestExists() {
+            UUID requestId = UUID.randomUUID();
+            Category category = new Category("TI");
+            Request request = new Request("Falha no login", "Usuário bloqueado", category, Priority.ALTA);
+
+            RequestStatusHistory historyEntry = new RequestStatusHistory(request, authenticatedUser, Status.ABERTA);
+
+            when(requestRepository.existsById(requestId)).thenReturn(true);
+            when(historyRepository.findByRequestIdOrderByChangedAt(requestId)).thenReturn(List.of(historyEntry));
+
+            List<RequestStatusHistoryResponse> result = service.findHistoryByRequestId(requestId);
+
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            assertEquals(Status.ABERTA, result.get(0).status());
+            assertEquals(authenticatedUser.getName(), result.get(0).changedByName());
+
+            verify(requestRepository, times(1)).existsById(requestId);
+            verify(historyRepository, times(1)).findByRequestIdOrderByChangedAt(requestId);
+        }
+
+        @Test
+        @DisplayName("Deve lançar ResourceNotFoundException quando solicitação não for encontrada")
+        void shouldThrowExceptionWhenRequestNotFound() {
+            UUID requestId = UUID.randomUUID();
+            when(requestRepository.existsById(requestId)).thenReturn(false);
+
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> service.findHistoryByRequestId(requestId)
+            );
+
+            assertEquals("Solicitação não encontrada para o ID informado: " + requestId, exception.getMessage());
+            verify(historyRepository, never()).findByRequestIdOrderByChangedAt(any());
         }
     }
 }
