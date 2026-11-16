@@ -2,6 +2,7 @@ package com.fcolucasvieira.central_solicitacoes_api.request.controller;
 
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.CreateRequestRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestResponse;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestStatusHistoryResponse;
 import com.fcolucasvieira.central_solicitacoes_api.request.dto.UpdateStatusRequest;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Priority;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Status;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -74,6 +76,20 @@ public class RequestController {
             @RequestParam(defaultValue = "25") int size
     ) {
         Page<RequestResponse> response = service.findAll(status, priority, categoryId, title, page, size);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Consultar histórico de status", description = "Retorna o histórico completo de transições de status de uma solicitação, em ordem cronológica crescente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Histórico retornado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Solicitação não encontrada")
+    })
+    @GetMapping("{id}/history")
+    public ResponseEntity<List<RequestStatusHistoryResponse>> findHistoryByRequestId(
+            @Parameter(description = "ID da solicitação", example = "b72b6495-2d41-4770-bf7d-53c8ea4bc48f")
+            @PathVariable UUID id) {
+        List<RequestStatusHistoryResponse> response = service.findHistoryByRequestId(id);
 
         return ResponseEntity.ok(response);
     }
