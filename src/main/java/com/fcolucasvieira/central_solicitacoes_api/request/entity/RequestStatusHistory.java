@@ -3,12 +3,14 @@ package com.fcolucasvieira.central_solicitacoes_api.request.entity;
 import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Status;
 import com.fcolucasvieira.central_solicitacoes_api.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "requests_status_history")
+@Getter
 public class RequestStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,4 +30,12 @@ public class RequestStatusHistory {
 
     @Column(name = "changed_at", nullable = false, updatable = false)
     private Instant changedAt = Instant.now();
+
+    protected RequestStatusHistory() {}
+
+    public RequestStatusHistory(Request request, User changedBy, Status status) {
+        this.request = request;
+        this.changedBy = changedBy;
+        this.status = status;
+    }
 }
