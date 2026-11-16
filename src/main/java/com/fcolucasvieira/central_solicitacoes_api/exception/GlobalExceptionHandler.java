@@ -3,6 +3,7 @@ package com.fcolucasvieira.central_solicitacoes_api.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -75,6 +76,17 @@ public class GlobalExceptionHandler {
                 "O parâmetro '" + ex.getName() + "' recebeu um valor com formato inválido."
         );
         detail.setTitle("Parâmetro de requisição inválido");
+        detail.setProperty("timestamp", Instant.now());
+        return detail;
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail handleBadCredentialsException(BadCredentialsException ex) {
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNAUTHORIZED,
+                "E-mail ou senha inválidos."
+        );
+        detail.setTitle("Credenciais inválidas");
         detail.setProperty("timestamp", Instant.now());
         return detail;
     }
