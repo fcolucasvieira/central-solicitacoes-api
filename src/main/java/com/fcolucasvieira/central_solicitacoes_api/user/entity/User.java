@@ -1,6 +1,7 @@
 package com.fcolucasvieira.central_solicitacoes_api.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
+@Getter
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
