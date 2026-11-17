@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -39,16 +38,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 User user = userRepository.findByEmail(subject)
-                        .orElseThrow(() -> new BadCredentialsException("Credenciais inválidas."));
+                        .orElse(null);
 
-                if (jwtService.isTokenValid(token, user)) {
+                if (user != null && jwtService.isTokenValid(token, user)) {
                     var authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         } catch (Exception ex) {
-            log.warn("Token inválido: {}", ex.getMessage());
+            log.warn("Token JWT inválido ou expirado: {}", ex.getMessage());
         }
 
         filterChain.doFilter(request, response);
