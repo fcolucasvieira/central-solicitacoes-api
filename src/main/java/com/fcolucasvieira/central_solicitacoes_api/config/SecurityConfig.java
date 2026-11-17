@@ -1,5 +1,6 @@
 package com.fcolucasvieira.central_solicitacoes_api.config;
 
+import com.fcolucasvieira.central_solicitacoes_api.jwt.JwtAuthenticationEntryPoint;
 import com.fcolucasvieira.central_solicitacoes_api.jwt.JwtAuthenticationFilter;
 import com.fcolucasvieira.central_solicitacoes_api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +29,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthenticationFilter authFilter;
+    private final JwtAuthenticationEntryPoint authEntryPoint;
     private final UserRepository userRepository;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -40,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authEntryPoint))
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
