@@ -35,7 +35,7 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public CategoryResponse findById(UUID id) {
-        Category category = repository.findById(id)
+        Category category = repository.findByIdAndActiveIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada para o ID informado: " + id));
 
         return CategoryResponse.from(category);

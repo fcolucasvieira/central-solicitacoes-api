@@ -28,7 +28,7 @@ public class AuthService {
         boolean emailExists = userRepository.existsByEmail(request.email());
 
         if (emailExists) {
-            throw new ResourceAlreadyExistsException("Email já existente.");
+            throw new ResourceAlreadyExistsException("Usuário já cadastrado com o email: " + request.email());
         }
 
         String passwordHash = passwordEncoder.encode(request.password());
