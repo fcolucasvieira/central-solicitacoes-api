@@ -85,20 +85,20 @@ class CategoryServiceTest {
         void shouldReturnCategoryWhenIdExists() {
             UUID categoryId = UUID.randomUUID();
             Category category = new Category("Financeiro");
-            when(repository.findById(categoryId)).thenReturn(Optional.of(category));
+            when(repository.findByIdAndActiveIsTrue(categoryId)).thenReturn(Optional.of(category));
 
             CategoryResponse response = service.findById(categoryId);
 
             assertNotNull(response);
             assertEquals("Financeiro", response.name());
-            verify(repository, times(1)).findById(categoryId);
+            verify(repository, times(1)).findByIdAndActiveIsTrue(categoryId);
         }
 
         @Test
         @DisplayName("Deve lançar ResourceNotFoundException quando o ID não for encontrado")
         void shouldThrowExceptionWhenIdDoesNotExist() {
             UUID categoryId = UUID.randomUUID();
-            when(repository.findById(categoryId)).thenReturn(Optional.empty());
+            when(repository.findByIdAndActiveIsTrue(categoryId)).thenReturn(Optional.empty());
 
             ResourceNotFoundException exception = assertThrows(
                     ResourceNotFoundException.class,
@@ -106,7 +106,7 @@ class CategoryServiceTest {
             );
 
             assertEquals("Categoria não encontrada para o ID informado: " + categoryId, exception.getMessage());
-            verify(repository, times(1)).findById(categoryId);
+            verify(repository, times(1)).findByIdAndActiveIsTrue(categoryId);
         }
     }
 
