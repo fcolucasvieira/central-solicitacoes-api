@@ -7,12 +7,12 @@ import jakarta.validation.constraints.NotBlank;
 @Schema(description = "Credenciais para autenticação do usuário.")
 public record LoginRequest(
         @Schema(description = "E-mail cadastrado do usuário.", example = "lucas@email.com")
-        @Email
-        @NotBlank
+        @Email(message = "E-mail com formato inválido.")
+        @NotBlank(message = "E-mail é obrigatório.")
         String email,
 
         @Schema(description = "Senha do usuário.", example = "senha@123")
-        @NotBlank
+        @NotBlank(message = "Senha é obrigatória.")
         String password
 ) {
 }

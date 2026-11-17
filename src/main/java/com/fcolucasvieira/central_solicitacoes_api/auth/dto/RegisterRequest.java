@@ -12,13 +12,13 @@ public record RegisterRequest(
         String name,
 
         @Schema(description = "E-mail do usuário. Deve ser único no sistema.", example = "lucas@email.com")
-        @Email
-        @NotBlank
+        @Email(message = "E-mail com formato inválido.")
+        @NotBlank(message = "E-mail é obrigatório.")
         String email,
 
         @Schema(description = "Senha do usuário. Mínimo de 8 caracteres.", example = "senha@123")
-        @NotBlank
-        @Size(min = 8)
+        @NotBlank(message = "Senha é obrigatória.")
+        @Size(min = 8, message = "A senha deve conter no mínimo 8 caracteres.")
         String password
 ) {
 }
