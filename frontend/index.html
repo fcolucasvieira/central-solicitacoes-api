@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Solicitações | Loading Desenvolvimento Jr.</title>
+
+    <!-- Favicon oficial da Loading -->
+    <link rel="icon" type="image/svg+xml" href="assets/icone_com_fundo.svg">
+
+    <!-- Estilos e Design System -->
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Seção de autenticação (Login / Registro) -->
+     <section id="auth-section" class="auth-wrapper">
+    <div class="auth-card">
+
+        <!-- Cabeçalho com o logo da Loading -->
+        <header class="auth-header">
+            <img src="assets/logo_principal.svg" alt="Loading Desenvolvimento Jr." class="auth-logo">
+            <h1 class="auth-title">Central de Solicitações</h1>
+            <p class="auth-subtitle">Acesse o sistema interno para registrar e acompanhar demandas</p>
+        </header>
+
+        <!-- Alternador de Abas: Entrar / Criar Conta -->
+        <div class="auth-tabs">
+            <button id="tab-login" class="tab-btn active" type="button">Entrar</button>
+            <button id="tab-register" class="tab-btn" type="button">Criar Conta</button>
+        </div>
+
+        <!-- Caixa de Feedback (Alertas de erro ou sucesso) -->
+        <div id="auth-alert" class="alert"></div>
+
+        <!-- Formulário de Login -->
+        <form id="login-form" class="auth-form">
+            <div class="form-group">
+                <label for="login-email" class="form-label">E-mail corporativo</label>
+                <input
+                        type="email"
+                        id="login-email"
+                        class="form-input"
+                        placeholder="seu.email@empresa.com"
+                        required
+                        autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="login-password" class="form-label">Senha</label>
+                <input
+                        type="password"
+                        id="login-password"
+                        class="form-input"
+                        placeholder="Digite sua senha"
+                        required
+                        autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary">Entrar no Sistema</button>
+        </form>
+
+        <!-- Formulário de Registro (Criar Conta) -->
+        <form id="register-form" class="auth-form hidden">
+            <div class="form-group">
+                <label for="reg-name" class="form-label">Nome completo</label>
+                <input
+                        type="text"
+                        id="reg-name"
+                        class="form-input"
+                        placeholder="Seu nome"
+                        required
+                        autocomplete="name"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="reg-email" class="form-label">E-mail</label>
+                <input
+                        type="email"
+                        id="reg-email"
+                        class="form-input"
+                        placeholder="seu.email@empresa.com"
+                        required
+                        autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="reg-password" class="form-label">Senha</label>
+                <input
+                        type="password"
+                        id="reg-password"
+                        class="form-input"
+                        placeholder="Crie uma senha (mínimo 8 caracteres)"
+                        required
+                        minlength="8"
+                        autocomplete="new-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary">Criar Conta</button>
+        </form>
+
+    </div>
+</section>
+
+<!-- 2. Seção de central de solicitações (Dashboard principal) -->
+<main id="main-app" class="hidden">
+    <!-- Barra de Navegação Superior (Header) -->
+    <header style="background-color: var(--color-surface-white); border-bottom: 1px solid var(--color-border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <img src="assets/icone_com_fundo.svg" alt="Loading Icon" style="height: 36px; width: 36px;">
+            <div>
+                <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-primary); margin: 0;">Central de Solicitações</h2>
+                <span style="font-size: 0.75rem; color: var(--color-text-muted);">Loading Desenvolvimento Jr.</span>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <span id="user-greeting" style="font-size: 0.875rem; font-weight: 600; color: var(--color-text-main);"></span>
+            <button id="logout-btn" class="btn" style="background-color: var(--color-primary-light); color: var(--color-primary); font-size: 0.8125rem; padding: 0.4rem 0.875rem;">Sair</button>
+        </div>
+    </header>
+
+    <!-- Espaço reservado para o Dia 2 -->
+    <section style="max-width: 1200px; margin: 3rem auto; padding: 0 1rem; text-align: center;">
+        <div style="background-color: var(--color-surface-white); padding: 3rem 2rem; border-radius: var(--radius-lg); border: 1px dashed var(--color-border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+            <img src="assets/mascote.svg" alt="Mascote Loading" style="height: 120px; width: auto;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary);">Login realizado com sucesso!</h3>
+            <p style="color: var(--color-text-muted); max-width: 500px; font-size: 0.9375rem;">
+                Você está autenticado no sistema via token JWT. No <strong>Dia 2</strong>, implementaremos o cadastro, filtros e a listagem de solicitações!
+            </p>
+        </div>
+    </section>
+</main>
+
+<!-- Script principal como Módulo ES6 -->
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

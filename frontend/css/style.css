@@ -1,0 +1,180 @@
+
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+
+    background: radial-gradient(circle at 10% 20%, var(--color-primary-light) 0%, var(--color-bg-body) 90%);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    background-color: var(--color-surface-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 3. Cabeçalho do Card (Logo e Título) */
+.auth-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.auth-logo {
+    height: 48px;
+    width: auto;
+    margin-bottom: 0.25rem;
+}
+
+.auth-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.auth-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+/* 4. Abas de Alternância (Entrar / Criar Conta)
+   - Usamos flexbox com flex: 1 nos botões para que ambos dividam o espaço exatamente ao meio (50% cada).
+*/
+.auth-tabs {
+    display: flex;
+    background-color: #F1EFFE;
+    border-radius: var(--radius-md);
+    padding: 4px;
+    gap: 4px;
+}
+
+.tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Quando o botão tiver a classe .active, ele ganha destaque visual */
+.tab-btn.active {
+    background-color: var(--color-surface-white);
+    color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 5. Formulários e Campos de Digitação */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: left;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-white);
+    color: var(--color-text-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Efeito ao focar no campo (:focus)
+   - outline: none remove aquela borda preta padrão feia do navegador.
+   - box-shadow cria um anel roxo suave ao redor da caixa, indicando que ela está ativa.
+*/
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px rgba(130, 88, 247, 0.2);
+}
+
+.form-input::placeholder {
+    color: var(--color-text-light);
+}
+
+/* 6. Botões de Ação */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+}
+
+/* Efeito ao passar o mouse (:hover) */
+.btn-primary:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px); /* Levanta sutilmente o botão em 1 pixel */
+}
+
+/* Estado desabilitado (quando estiver carregando a requisição) */
+.btn-primary:disabled {
+    background-color: #AB97FA;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 7. Caixas de Feedback e Mensagens de Erro */
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    display: none; /* Começa invisível */
+}
+
+.alert-danger {
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid #FECACA;
+}
+
+.alert-success {
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid #BBF7D0;
+}
+
+/* 8. Classe Utilitária para ocultar elementos via JavaScript */
+.hidden {
+    display: none !important;
+}
