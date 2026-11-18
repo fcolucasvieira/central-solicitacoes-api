@@ -17,9 +17,7 @@ let currentPage = 1;
 const pageSize = 10;
 let totalPages = 1;
 
-/**
- * 1. Busca as categorias ativas no Back-End (GET /categories?page=1&size=25)
- */
+// Busca as categorias ativas no Back-End (GET /categories?page=1&size=25)
 export async function loadCategories() {
   try {
     const response = await apiFetch('/categories?page=1&size=25');
@@ -44,9 +42,7 @@ export async function loadCategories() {
   }
 }
 
-/**
- * 2. Consulta paginada com filtros combinados (GET /requests)
- */
+// Consulta paginada com filtros combinados (GET /requests)
 export async function loadRequests() {
   const tableBody = document.getElementById('requests-table-body');
   const loadingState = document.getElementById('table-loading');
@@ -99,7 +95,6 @@ export async function loadRequests() {
       const statusLabel = formatStatusLabel(req.status);
       const priorityLabel = formatPriorityLabel(req.priority);
 
-      // Botão de Ação contextual com base no status atual (RF04)
       let actionButtonHtml = '';
       if (req.status === 'ABERTA') {
         actionButtonHtml = `
@@ -177,14 +172,11 @@ export async function loadRequests() {
   }
 }
 
-/**
- * 3. Gerenciamento de cliques na Tabela (Avançar Status e Abrir Histórico)
- */
+// Gerenciamento de cliques na Tabela (Avançar Status e Abrir Histórico)
 export function initTableActions() {
   const tableBody = document.getElementById('requests-table-body');
 
   tableBody.addEventListener('click', async (e) => {
-    // 1. Clique para Avançar Status (RF04)
     const btnStatus = e.target.closest('.btn-action-status');
     if (btnStatus) {
       const requestId = btnStatus.dataset.id;
@@ -202,7 +194,6 @@ export function initTableActions() {
         const statusName = nextStatus === 'EM_ANDAMENTO' ? 'Em andamento' : 'Concluída';
         showToast(`Status atualizado para: ${statusName}`, 'success');
 
-        // Recarrega a tabela para atualizar badge e botão
         await loadRequests();
       } catch (error) {
         showToast(error.message, 'danger');
@@ -212,7 +203,6 @@ export function initTableActions() {
       return;
     }
 
-    // 2. Clique para Abrir Histórico de Transições
     const btnHistory = e.target.closest('.btn-open-history');
     if (btnHistory) {
       const requestId = btnHistory.dataset.id;
@@ -222,9 +212,7 @@ export function initTableActions() {
   });
 }
 
-/**
- * 4. Modal de Histórico de Mudanças de Status (Linha do Tempo)
- */
+// Modal de Histórico de Mudanças de Status (Linha do Tempo)
 async function openHistoryModal(requestId, requestTitle) {
   const modal = document.getElementById('modal-history');
   const subtitle = document.getElementById('history-modal-subtitle');
@@ -288,9 +276,7 @@ export function initHistoryModal() {
   });
 }
 
-/**
- * 5. Inicializa Filtros, Busca e Paginação
- */
+// Inicializa Filtros, Busca e Paginação
 export function initFiltersAndPagination() {
   const filterInputs = [
     document.getElementById('filter-status'),
@@ -342,9 +328,7 @@ export function initFiltersAndPagination() {
   });
 }
 
-/**
- * 6. Modal de Cadastro de Solicitações (POST /requests)
- */
+// Modal de Cadastro de Solicitações (POST /requests)
 export function initRequestModal(onSuccessCallback) {
   const modal = document.getElementById('modal-new-request');
   const btnOpen = document.getElementById('btn-open-modal');
@@ -441,9 +425,7 @@ export function initRequestModal(onSuccessCallback) {
   }
 }
 
-/**
- * 7. Notificações Toast Flutuantes (Fluidez e Feedback)
- */
+// Notificações Toast Flutuantes (Fluidez e Feedback)
 export function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -454,7 +436,6 @@ export function showToast(message, type = 'success') {
 
   container.appendChild(toast);
 
-  // Remove automaticamente após 3.5 segundos
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(16px)';

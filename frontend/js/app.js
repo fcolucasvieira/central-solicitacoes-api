@@ -33,24 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 1. Carrega categorias dinâmicas nos selects
         loadCategories();
 
-        // 2. Inicializa os filtros e a paginação
         initFiltersAndPagination();
 
-        // 3. Inicializa o modal de cadastro passando o callback para recarregar a tabela
         initRequestModal(() => {
             loadRequests();
         });
 
-        // 4. Inicializa os cliques de ação na tabela (Avançar Status e Abrir Histórico)
         initTableActions();
 
-        // 5. Inicializa o modal de Histórico (Linha do Tempo)
         initHistoryModal();
 
-        // 6. Carrega a listagem inicial de solicitações do Back-End
         loadRequests();
 
         console.log('Sessão ativa encontrada para:', user.email);
