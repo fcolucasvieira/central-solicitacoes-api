@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central de Solicitações | Loading Desenvolvimento Jr.</title>
+
+  <link rel="icon" type="image/svg+xml" href="assets/icone_com_fundo.svg">
+
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Autenticação -->
+  <section id="auth-section" class="auth-wrapper">
+    <div class="auth-card">
+      
+      <header class="auth-header">
+        <img src="assets/logo_principal.svg" alt="Loading Desenvolvimento Jr." class="auth-logo">
+        <h1 class="auth-title">Central de Solicitações</h1>
+        <p class="auth-subtitle">Acesse o sistema interno para registrar e acompanhar demandas</p>
+      </header>
+
+      <div class="auth-tabs" role="tablist">
+        <button id="tab-login" class="tab-btn active" type="button" role="tab">Entrar</button>
+        <button id="tab-register" class="tab-btn" type="button" role="tab">Criar Conta</button>
+      </div>
+
+      <div id="auth-alert" class="alert" role="alert"></div>
+
+      <form id="login-form" class="auth-form">
+        <div class="form-group">
+          <label for="login-email" class="form-label">E-mail</label>
+          <input 
+            type="email" 
+            id="login-email" 
+            class="form-input" 
+            placeholder="seu-email@empresa.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="login-password" class="form-label">Senha</label>
+          <input 
+            type="password" 
+            id="login-password" 
+            class="form-input" 
+            placeholder="Digite sua senha" 
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Entrar</button>
+      </form>
+
+      <form id="register-form" class="auth-form hidden">
+        <div class="form-group">
+          <label for="reg-name" class="form-label">Nome completo</label>
+          <input 
+            type="text" 
+            id="reg-name" 
+            class="form-input" 
+            placeholder="Seu nome" 
+            required
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email" class="form-label">E-mail</label>
+          <input 
+            type="email" 
+            id="reg-email" 
+            class="form-input" 
+            placeholder="seu-email@empresa.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password" class="form-label">Senha</label>
+          <input 
+            type="password" 
+            id="reg-password" 
+            class="form-input" 
+            placeholder="Crie uma senha (mínimo 8 caracteres)"
+            required
+            minlength="8"
+            autocomplete="new-password"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Criar Conta</button>
+      </form>
+
+    </div>
+  </section>
+
+  <!-- Central de Solicitações -->
+       <main id="main-app" class="hidden">
+    
+    <header class="navbar">
+      <div class="navbar-brand">
+        <img src="assets/icone_com_fundo.svg" alt="Loading Icon" class="navbar-icon">
+        <div>
+          <h2 class="navbar-title">Central de Solicitações</h2>
+          <span class="navbar-subtitle">Loading Desenvolvimento Jr.</span>
+        </div>
+      </div>
+
+      <div class="navbar-user">
+        <span id="user-greeting" class="user-greeting"></span>
+        <button id="logout-btn" class="btn btn-secondary btn-sm" type="button">Sair</button>
+      </div>
+    </header>
+
+    <div class="dashboard-container">
+      
+      <div class="dashboard-header">
+        <div>
+          <h1 class="dashboard-title">Demandas & Solicitações</h1>
+          <p class="dashboard-desc">Acompanhe, filtre e gerencie os fluxos das solicitações internas</p>
+        </div>
+        <button id="btn-open-modal" class="btn btn-primary" type="button">
+          + Nova Solicitação
+        </button>
+      </div>
+
+      <section class="filters-card">
+        <div class="filters-grid">
+          
+          <div class="filter-group filter-search">
+            <label for="filter-title" class="form-label">Buscar por título</label>
+            <input 
+              type="text" 
+              id="filter-title" 
+              class="form-input" 
+              placeholder="Digite o título da solicitação..."
+            >
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-status" class="form-label">Status</label>
+            <select id="filter-status" class="form-select">
+              <option value="">Todos os status</option>
+              <option value="ABERTA">Aberta</option>
+              <option value="EM_ANDAMENTO">Em andamento</option>
+              <option value="CONCLUIDA">Concluída</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-priority" class="form-label">Prioridade</label>
+            <select id="filter-priority" class="form-select">
+              <option value="">Todas as prioridades</option>
+              <option value="BAIXA">Baixa</option>
+              <option value="MEDIA">Média</option>
+              <option value="ALTA">Alta</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-category" class="form-label">Categoria</label>
+            <select id="filter-category" class="form-select">
+              <option value="">Todas as categorias</option>
+            </select>
+          </div>
+
+          <div class="filter-actions">
+            <button id="btn-clear-filters" class="btn btn-secondary" type="button" title="Limpar todos os filtros">
+              Limpar
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="table-card">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Categoria</th>
+                <th>Prioridade</th>
+                <th>Status</th>
+                <th>Criado em</th>
+                <th style="text-align: center; width: 220px;">Ações & Fluxo</th>
+              </tr>
+            </thead>
+            <tbody id="requests-table-body">
+            </tbody>
+          </table>
+        </div>
+
+        <div id="table-loading" class="table-state hidden">
+          <div class="spinner"></div>
+          <p>Carregando solicitações...</p>
+        </div>
+
+        <div id="table-empty" class="table-state hidden">
+          <img src="assets/mascote.svg" alt="Sem solicitações" class="empty-state-img">
+          <h3>Nenhuma solicitação encontrada</h3>
+          <p>Não há solicitações cadastradas ou nenhum item bateu com os filtros aplicados.</p>
+        </div>
+
+        <div class="pagination-footer">
+          <span id="pagination-info" class="pagination-info">Mostrando 0 de 0</span>
+          <div class="pagination-buttons">
+            <button id="btn-prev-page" class="btn btn-secondary btn-sm" disabled type="button">Anterior</button>
+            <span id="pagination-current-page" class="pagination-current">Página 1</span>
+            <button id="btn-next-page" class="btn btn-secondary btn-sm" disabled type="button">Próxima</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Cadastro de Solicitação -->
+    <div id="modal-new-request" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        
+        <header class="modal-header">
+          <h2 class="modal-title">Nova Solicitação</h2>
+          <button id="btn-close-modal" class="modal-close" type="button" aria-label="Fechar">&times;</button>
+        </header>
+
+        <form id="form-new-request" class="modal-body">
+          <div id="modal-alert" class="alert" role="alert"></div>
+
+          <div class="form-group">
+            <label for="req-title" class="form-label">Título da demanda *</label>
+            <input 
+              type="text" 
+              id="req-title" 
+              class="form-input" 
+              placeholder="Ex: Falha na conexão de rede do 2º andar" 
+              required
+              maxlength="100"
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="req-category" class="form-label">Categoria *</label>
+              <select id="req-category" class="form-select" required>
+                <option value="">Selecione a categoria</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="req-priority" class="form-label">Prioridade *</label>
+              <select id="req-priority" class="form-select" required>
+                <option value="">Selecione a prioridade</option>
+                <option value="BAIXA">Baixa</option>
+                <option value="MEDIA">Média</option>
+                <option value="ALTA">Alta</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="req-description" class="form-label">Descrição detalhada *</label>
+            <textarea 
+              id="req-description" 
+              class="form-textarea" 
+              rows="4" 
+              placeholder="Explique o contexto, localização e o que é necessário para a resolução..."
+              required
+            ></textarea>
+          </div>
+
+          <footer class="modal-footer">
+            <button id="btn-cancel-modal" class="btn btn-secondary" type="button">Cancelar</button>
+            <button id="btn-submit-request" type="submit" class="btn btn-primary">Registrar Solicitação</button>
+          </footer>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Histórico de mudanças de status -->
+    <div id="modal-history" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-card-lg">
+        
+        <header class="modal-header">
+          <div>
+            <h2 class="modal-title">Histórico de Transições</h2>
+            <span id="history-modal-subtitle" class="modal-subtitle"></span>
+          </div>
+          <button id="btn-close-history-modal" class="modal-close" type="button" aria-label="Fechar">&times;</button>
+        </header>
+
+        <div class="modal-body">
+          <div id="history-loading" class="table-state hidden" style="padding: 2rem;">
+            <div class="spinner"></div>
+            <p>Carregando histórico...</p>
+          </div>
+
+          <div id="history-timeline" class="timeline-container">
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button id="btn-close-history" class="btn btn-secondary" type="button">Fechar</button>
+        </footer>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

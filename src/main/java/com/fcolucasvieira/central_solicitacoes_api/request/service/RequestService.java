@@ -1,0 +1,114 @@
+package com.fcolucasvieira.central_solicitacoes_api.request.service;
+
+import com.fcolucasvieira.central_solicitacoes_api.category.entity.Category;
+import com.fcolucasvieira.central_solicitacoes_api.category.repository.CategoryRepository;
+import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceNotFoundException;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.CreateRequestRequest;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestResponse;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.RequestStatusHistoryResponse;
+import com.fcolucasvieira.central_solicitacoes_api.request.dto.UpdateStatusRequest;
+import com.fcolucasvieira.central_solicitacoes_api.request.entity.Request;
+import com.fcolucasvieira.central_solicitacoes_api.request.entity.RequestStatusHistory;
+import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Priority;
+import com.fcolucasvieira.central_solicitacoes_api.request.entity.enums.Status;
+import com.fcolucasvieira.central_solicitacoes_api.request.repository.RequestRepository;
+import com.fcolucasvieira.central_solicitacoes_api.request.repository.RequestStatusHistoryRepository;
+import com.fcolucasvieira.central_solicitacoes_api.request.specification.RequestSpecs;
+import com.fcolucasvieira.central_solicitacoes_api.user.entity.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class RequestService {
+    private final RequestRepository requestRepository;
+    private final RequestStatusHistoryRepository historyRepository;
+    private final CategoryRepository categoryRepository;
+
+    @Transactional
+    public RequestResponse create(CreateRequestRequest request) {
+        Category category = categoryRepository.findByIdAndActiveIsTrue(request.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada para o ID informado: " + request.categoryId()));
+
+        User userAuthenticated = getAuthenticatedUser();
+
+        Request req = new Request(request.title(), request.description(), category, request.priority());
+        requestRepository.save(req);
+
+        RequestStatusHistory statusHistory = new RequestStatusHistory(req, userAuthenticated, Status.ABERTA);
+        historyRepository.save(statusHistory);
+
+        return RequestResponse.from(req);
+    }
+
+    @Transactional(readOnly = true)
+    public RequestResponse findById(UUID id) {
+        Request request = requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada para o ID informado: " + id));
+
+        return RequestResponse.from(request);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RequestResponse> findAll(
+            Status status,
+            Priority priority,
+            UUID categoryId,
+            String title,
+            int page,
+            int size
+            ) {
+        page = Math.max(page - 1, 0);
+        size = Math.min(Math.max(size, 1), 25);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Specification<Request> spec = Specification
+                .where(RequestSpecs.hasStatus(status))
+                .and(RequestSpecs.hasPriority(priority))
+                .and(RequestSpecs.hasCategoryId(categoryId))
+                .and(RequestSpecs.titleContains(title));
+
+        return requestRepository.findAll(spec, pageable)
+                .map(RequestResponse::from);
+    }
+
+    @Transactional
+    public RequestResponse updateStatus(UUID id, UpdateStatusRequest request) {
+        Request req = requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada para o ID informado: " + id));
+
+        User authenticatedUser = getAuthenticatedUser();
+
+        req.updateStatus(request.status());
+
+        RequestStatusHistory statusHistory = new RequestStatusHistory(req, authenticatedUser, request.status());
+        historyRepository.save(statusHistory);
+
+        return RequestResponse.from(req);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RequestStatusHistoryResponse> findHistoryByRequestId(UUID id) {
+        if (!requestRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Solicitação não encontrada para o ID informado: " + id);
+        }
+
+        return historyRepository.findByRequestIdOrderByChangedAt(id).stream()
+                .map(RequestStatusHistoryResponse::from)
+                .toList();
+    }
+
+    private User getAuthenticatedUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+}

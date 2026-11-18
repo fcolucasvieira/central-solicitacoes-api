@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Cores da EJ (Loading Jr.) */
+    --color-primary: #3F1157;           /* Violeta Profundo oficial */
+    --color-primary-hover: #5D18D7;     /* Roxo 700 para efeitos de passar o mouse */
+    --color-primary-light: #F1EFFE;     /* Fundo suave baseado no Roxo 50 */
+    --color-cyan: #01D1D8;              /* Ciano oficial */
+    --color-orange: #F68910;            /* Laranja Vibrante oficial */
+    --color-dark: #141212;              /* Grafite oficial para textos */
+
+    /* Cores de Fundo e Superfície */
+    --color-bg-body: #F7F7FA;
+    --color-surface-white: #FFFFFF;
+    --color-border: #E5E2EE;
+    --color-border-focus: #8258F7;
+
+    /* Textos */
+    --font-family-base: 'Archivo', sans-serif;
+    --color-text-main: #141212;
+    --color-text-muted: #6B6875;
+    --color-text-light: #8E8A9C;
+
+    /* Cores dos Status da Central de Solicitações */
+    --status-aberta-text: #0E7490;
+    --status-aberta-bg: #ECFEFF;
+    --status-andamento-text: #C2410C;
+    --status-andamento-bg: #FFF7ED;
+    --status-concluida-text: #047857;
+    --status-concluida-bg: #ECFDF5;
+
+    /* Cores das Prioridades */
+    --priority-baixa-text: #475569;
+    --priority-baixa-bg: #F1F5F9;
+    --priority-media-text: #B45309;
+    --priority-media-bg: #FEF3C7;
+    --priority-alta-text: #B91C1C;
+    --priority-alta-bg: #FEE2E2;
+
+    /* Feedbacks / Alertas */
+    --color-danger: #DC2626;
+    --color-danger-bg: #FEF2F2;
+    --color-success: #16A34A;
+    --color-success-bg: #F0FDF4;
+
+    /* Espaçamentos e Bordas */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(63, 17, 87, 0.1);
+}
+
+body {
+    font-family: var(--font-family-base);
+    color: var(--color-text-main);
+    background-color: var(--color-bg-body);
+}
