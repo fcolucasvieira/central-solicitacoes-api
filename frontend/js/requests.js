@@ -1,15 +1,18 @@
 /**
- * REQUESTS.JS - GERENCIAMENTO DE SOLICITAÇÕES, LISTAGEM, FILTROS E PAGINAÇÃO
+ * REQUESTS.JS - GERENCIAMENTO DE SOLICITAÇÕES, LISTAGEM, FILTROS, TRANSIÇÃO DE STATUS E HISTÓRICO
  * 
  * Responsabilidades:
  * 1. Carregar categorias paginadas do Back-End (GET /categories)
- * 2. Abrir, fechar e submeter o modal de cadastro (POST /requests)
- * 3. Listar solicitações com paginação e filtros combinados (GET /requests)
+ * 2. Cadastrar nova solicitação (POST /requests)
+ * 3. Listar solicitações com paginação e filtros (GET /requests)
+ * 4. Transição de status estrita ABERTA -> EM_ANDAMENTO -> CONCLUIDA (PATCH /requests/{id}/status) [RF04]
+ * 5. Linha do tempo com histórico de mudanças (GET /requests/{id}/history) [Opcional / Diferencial]
+ * 6. Notificações Toast para feedback fluido
  */
 
 import { apiFetch } from './api.js';
 
-// Estado global de paginação e filtros da tela
+// Estado global da tela
 let currentPage = 1;
 const pageSize = 10;
 let totalPages = 1;
@@ -37,13 +40,12 @@ export async function loadCategories() {
       modalSelect.appendChild(optModal);
     });
   } catch (error) {
-    console.error('Erro ao carregar categorias:', error);
+    console.error('Falha ao carregar categorias:', error);
   }
 }
 
 /**
  * 2. Consulta paginada com filtros combinados (GET /requests)
- * Integrado à Specification (RequestSpecs) do Spring Boot
  */
 export async function loadRequests() {
   const tableBody = document.getElementById('requests-table-body');
@@ -54,19 +56,16 @@ export async function loadRequests() {
   const btnPrev = document.getElementById('btn-prev-page');
   const btnNext = document.getElementById('btn-next-page');
 
-  // Captura os valores selecionados nos filtros da tela
   const status = document.getElementById('filter-status').value;
   const priority = document.getElementById('filter-priority').value;
   const categoryId = document.getElementById('filter-category').value;
   const title = document.getElementById('filter-title').value.trim();
 
-  // Exibe o estado de loading e limpa linhas antigas
   loadingState.classList.remove('hidden');
   emptyState.classList.add('hidden');
   tableBody.innerHTML = '';
 
   try {
-    // Monta os parâmetros de URL dinamicamente
     const params = new URLSearchParams({
       page: currentPage.toString(),
       size: pageSize.toString()
@@ -84,28 +83,55 @@ export async function loadRequests() {
     totalPages = pageMeta.totalPages || 1;
     const totalElements = pageMeta.totalElements || requests.length;
 
-    // Atualiza controles de paginação
     paginationInfo.textContent = `Mostrando ${requests.length} de ${totalElements} solicitação(ões)`;
     paginationCurrentPage.textContent = `Página ${currentPage} de ${Math.max(totalPages, 1)}`;
     btnPrev.disabled = currentPage <= 1;
     btnNext.disabled = currentPage >= totalPages;
 
-    // Se não houver solicitações, mostra o estado vazio
     if (requests.length === 0) {
       emptyState.classList.remove('hidden');
       return;
     }
 
-    // Renderiza cada solicitação na tabela
     requests.forEach(req => {
       const tr = document.createElement('tr');
-
-      // Formatação amigável da data (dd/MM/yyyy às HH:mm)
       const dateFormatted = req.createdAt ? formatDate(req.createdAt) : '-';
-
-      // Textos amigáveis para status e prioridade
       const statusLabel = formatStatusLabel(req.status);
       const priorityLabel = formatPriorityLabel(req.priority);
+
+      // Botão de Ação contextual com base no status atual (RF04)
+      let actionButtonHtml = '';
+      if (req.status === 'ABERTA') {
+        actionButtonHtml = `
+          <button 
+            class="btn btn-sm btn-warning btn-action-status" 
+            data-id="${req.id}" 
+            data-next-status="EM_ANDAMENTO" 
+            title="Iniciar atendimento da solicitação"
+            type="button"
+          >
+            Iniciar
+          </button>
+        `;
+      } else if (req.status === 'EM_ANDAMENTO') {
+        actionButtonHtml = `
+          <button 
+            class="btn btn-sm btn-success btn-action-status" 
+            data-id="${req.id}" 
+            data-next-status="CONCLUIDA" 
+            title="Concluir a solicitação"
+            type="button"
+          >
+            Concluir
+          </button>
+        `;
+      } else if (req.status === 'CONCLUIDA') {
+        actionButtonHtml = `
+          <span style="font-size: 0.75rem; color: var(--color-success); font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
+            ✓ Finalizada
+          </span>
+        `;
+      }
 
       tr.innerHTML = `
         <td>
@@ -113,7 +139,7 @@ export async function loadRequests() {
           <span class="req-table-desc" title="${escapeHtml(req.description)}">${escapeHtml(req.description)}</span>
         </td>
         <td>
-          <span class="badge badge-category">${escapeHtml(req.category?.name || 'Geral')}</span>
+          <span class="badge badge-category">${escapeHtml(req.categoryName || 'Geral')}</span>
         </td>
         <td>
           <span class="badge badge-priority-${req.priority}">${priorityLabel}</span>
@@ -124,10 +150,19 @@ export async function loadRequests() {
         <td style="color: var(--color-text-muted); font-size: 0.8125rem;">
           ${dateFormatted}
         </td>
-        <td style="text-align: right;">
-          <span style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 500;">
-            #${req.id.substring(0, 8)}
-          </span>
+        <td style="text-align: center;">
+          <div class="table-actions-cell">
+            ${actionButtonHtml}
+            <button 
+              class="btn btn-sm btn-outline btn-open-history" 
+              data-id="${req.id}" 
+              data-title="${escapeHtml(req.title)}"
+              title="Ver histórico de transições"
+              type="button"
+            >
+              Histórico
+            </button>
+          </div>
         </td>
       `;
 
@@ -136,13 +171,125 @@ export async function loadRequests() {
 
   } catch (error) {
     console.error('Falha ao carregar solicitações:', error);
+    showToast(error.message, 'danger');
   } finally {
     loadingState.classList.add('hidden');
   }
 }
 
 /**
- * 3. Inicializa os ouvintes da barra de filtros e da paginação
+ * 3. Gerenciamento de cliques na Tabela (Avançar Status e Abrir Histórico)
+ */
+export function initTableActions() {
+  const tableBody = document.getElementById('requests-table-body');
+
+  tableBody.addEventListener('click', async (e) => {
+    // 1. Clique para Avançar Status (RF04)
+    const btnStatus = e.target.closest('.btn-action-status');
+    if (btnStatus) {
+      const requestId = btnStatus.dataset.id;
+      const nextStatus = btnStatus.dataset.nextStatus;
+
+      btnStatus.disabled = true;
+      btnStatus.textContent = '...';
+
+      try {
+        await apiFetch(`/requests/${requestId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: nextStatus })
+        });
+
+        const statusName = nextStatus === 'EM_ANDAMENTO' ? 'Em andamento' : 'Concluída';
+        showToast(`Status atualizado para: ${statusName}`, 'success');
+
+        // Recarrega a tabela para atualizar badge e botão
+        await loadRequests();
+      } catch (error) {
+        showToast(error.message, 'danger');
+        btnStatus.disabled = false;
+        btnStatus.textContent = nextStatus === 'EM_ANDAMENTO' ? 'Iniciar' : 'Concluir';
+      }
+      return;
+    }
+
+    // 2. Clique para Abrir Histórico de Transições
+    const btnHistory = e.target.closest('.btn-open-history');
+    if (btnHistory) {
+      const requestId = btnHistory.dataset.id;
+      const requestTitle = btnHistory.dataset.title;
+      openHistoryModal(requestId, requestTitle);
+    }
+  });
+}
+
+/**
+ * 4. Modal de Histórico de Mudanças de Status (Linha do Tempo)
+ */
+async function openHistoryModal(requestId, requestTitle) {
+  const modal = document.getElementById('modal-history');
+  const subtitle = document.getElementById('history-modal-subtitle');
+  const timeline = document.getElementById('history-timeline');
+  const loading = document.getElementById('history-loading');
+
+  subtitle.textContent = `Demanda: "${requestTitle}"`;
+  timeline.innerHTML = '';
+  loading.classList.remove('hidden');
+  modal.classList.remove('hidden');
+
+  try {
+    const historyList = await apiFetch(`/requests/${requestId}/history`);
+    loading.classList.add('hidden');
+
+    if (!historyList || historyList.length === 0) {
+      timeline.innerHTML = '<p style="color: var(--color-text-muted); font-size: 0.875rem;">Nenhum histórico registrado.</p>';
+      return;
+    }
+
+    historyList.forEach(item => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'timeline-item';
+
+      const dateFormatted = item.changedAt ? formatDate(item.changedAt) : '-';
+      const statusLabel = formatStatusLabel(item.status);
+
+      itemEl.innerHTML = `
+        <div class="timeline-dot dot-${item.status}"></div>
+        <div class="timeline-content">
+          <div class="timeline-header">
+            <span class="badge badge-status-${item.status}">${statusLabel}</span>
+            <span class="timeline-time">${dateFormatted}</span>
+          </div>
+          <span class="timeline-user">
+            Alterado por: <strong>${escapeHtml(item.changedByName || 'Usuário')}</strong>
+          </span>
+        </div>
+      `;
+
+      timeline.appendChild(itemEl);
+    });
+
+  } catch (error) {
+    loading.classList.add('hidden');
+    timeline.innerHTML = `<p style="color: var(--color-danger); font-size: 0.875rem;">Erro ao carregar histórico: ${escapeHtml(error.message)}</p>`;
+  }
+}
+
+export function initHistoryModal() {
+  const modal = document.getElementById('modal-history');
+  const btnCloseX = document.getElementById('btn-close-history-modal');
+  const btnClose = document.getElementById('btn-close-history');
+
+  const closeModal = () => modal.classList.add('hidden');
+
+  btnCloseX.addEventListener('click', closeModal);
+  btnClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+}
+
+/**
+ * 5. Inicializa Filtros, Busca e Paginação
  */
 export function initFiltersAndPagination() {
   const filterInputs = [
@@ -156,7 +303,6 @@ export function initFiltersAndPagination() {
   const btnPrev = document.getElementById('btn-prev-page');
   const btnNext = document.getElementById('btn-next-page');
 
-  // Ao alterar qualquer select de filtro, reseta para página 1 e recarrega
   filterInputs.forEach(select => {
     select.addEventListener('change', () => {
       currentPage = 1;
@@ -164,25 +310,23 @@ export function initFiltersAndPagination() {
     });
   });
 
-  // Busca textual com debounce suave ao digitar
   let debounceTimeout;
   searchInput.addEventListener('input', () => {
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(() => {
       currentPage = 1;
       loadRequests();
-    }, 350); // Aguarda 350ms após o usuário parar de digitar
+    }, 350);
   });
 
-  // Botão Limpar Filtros
   btnClear.addEventListener('click', () => {
     filterInputs.forEach(select => select.value = '');
     searchInput.value = '';
     currentPage = 1;
     loadRequests();
+    showToast('Filtros redefinidos', 'info');
   });
 
-  // Botões de Paginação
   btnPrev.addEventListener('click', () => {
     if (currentPage > 1) {
       currentPage--;
@@ -199,7 +343,7 @@ export function initFiltersAndPagination() {
 }
 
 /**
- * 4. Inicializa o Modal de Cadastro (abrir, fechar e submeter POST /requests)
+ * 6. Modal de Cadastro de Solicitações (POST /requests)
  */
 export function initRequestModal(onSuccessCallback) {
   const modal = document.getElementById('modal-new-request');
@@ -258,8 +402,8 @@ export function initRequestModal(onSuccessCallback) {
       });
 
       closeModal();
+      showToast('Solicitação registrada com sucesso!', 'success');
 
-      // Recarrega a tabela imediatamente para exibir a nova solicitação
       if (typeof onSuccessCallback === 'function') {
         onSuccessCallback();
       }
@@ -297,7 +441,29 @@ export function initRequestModal(onSuccessCallback) {
   }
 }
 
-// Funções Auxiliares de Formatação
+/**
+ * 7. Notificações Toast Flutuantes (Fluidez e Feedback)
+ */
+export function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  // Remove automaticamente após 3.5 segundos
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(16px)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// Funções Auxiliares de Formatação e Segurança
 function formatDate(isoString) {
   try {
     const date = new Date(isoString);
@@ -331,7 +497,6 @@ function formatPriorityLabel(priority) {
   return map[priority] || priority;
 }
 
-// Proteção básica contra injeção de HTML (XSS)
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text || '';
