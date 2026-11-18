@@ -89,7 +89,7 @@ As principais entidades são:
 - **Request:** representa uma solicitação, contendo título, descrição, categoria, prioridade e status atual.
 - **Category:** representa as categorias utilizadas para classificar as solicitações.
 - **User:** representa os usuários do sistema.
-- **RequestHistoryStatus:** registra os status alcançados por uma solicitação e o usuário responsável pela alteração.
+- **RequestStatusHistory:** registra os status alcançados por uma solicitação e o usuário responsável pela alteração.
 
 O histórico é mantido separadamente da solicitação, permitindo preservar os registros das mudanças de status ao longo do tempo.
 
@@ -169,7 +169,7 @@ A documentação detalha esquemas de requisição/resposta, exemplos e códigos 
 Os endpoints protegidos exigem um token JWT. Para autenticar no Swagger UI:
 
 1. Use `POST /auth/register` ou `POST /auth/login` para obter um token.
-2. Clique no botão **Authorize 🔒** no topo da página.
+2. Clique no botão **Authorize** no topo da página.
 3. No campo **Value**, informe: `<seu_token_jwt>` (sem o prefixo `Bearer`).
 4. Clique em **Authorize** e feche o modal.
 
@@ -177,9 +177,30 @@ Todos os endpoints protegidos passarão a enviar o header `Authorization: Bearer
 
 ---
 
+## Interface Web (Front-End)
+
+A aplicação conta com uma interface web moderna, responsiva e desenvolvida com **HTML5 semântico, CSS3 e JavaScript puro (ES6 Modules)**, aplicando a identidade visual e o Brandbook oficial da **Loading Desenvolvimento Jr.**
+
+### Funcionalidades da Interface:
+- **Autenticação:** Telas de Login e Criação de Conta integradas à API via JWT, com persistência da sessão no `localStorage` e fluxo de logout.
+- **Painel de Solicitações:** Listagem paginada consumindo `GET /requests`, com badges temáticos de status, prioridade e data formatada.
+- **Filtros Combináveis & Busca:** Filtro simultâneo por Status, Prioridade, Categoria (carregada dinamicamente via `GET /categories`) e Busca textual no título com técnica de debounce (350ms).
+- **Cadastro Dinâmico (RF01):** Modal flutuante para abertura de novas demandas (`POST /requests`) com validação de campos e feedback amigável.
+- **Transição de Status (RF04):** Botões de ação contextuais na tabela para avançar o fluxo estrito (`ABERTA → EM_ANDAMENTO → CONCLUIDA`) com chamadas `PATCH /requests/{id}/status`.
+- **Linha do Tempo de Histórico (Opcional):** Modal com timeline cronológica completa de todas as alterações de status, exibindo o responsável e o timestamp exato (`GET /requests/{id}/history`).
+- **Fluidez & UX:** Notificações flutuantes (*Toasts*) não intrusivas para feedback de operações e estados de *Loading* e *Empty State*.
+
+### Como Executar o Front-End:
+1. Certifique-se de que a API Back-End esteja em execução na porta `8080`.
+2. Abra a pasta do projeto no **VS Code**.
+3. Com a extensão **Live Server** instalada, clique com o botão direito no arquivo `frontend/index.html` e selecione **"Open with Live Server"**.
+4. A aplicação será aberta no navegador em `http://127.0.0.1:5500/frontend/index.html`.
+
+---
+
 ## Funcionalidades
 
-O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
+O projeto está concluído. Sua estrutura contempla:
 
 - [x] Configuração do PostgreSQL com Docker Compose.
 - [x] Configuração de conexão com o banco por variáveis de ambiente.
@@ -195,7 +216,7 @@ O projeto está em desenvolvimento. Até o momento, sua estrutura contempla:
 - [x] Módulo de autenticação (`auth`): registro de usuário e login com geração de token JWT (JJWT + Spring Security).
 - [x] Endpoints protegidos por autenticação Bearer Token (JWT stateless via `JwtAuthenticationFilter`).
 - [x] Histórico de status das solicitações (`requests_status_history`): registro automático do usuário autenticado e do status em cada criação e transição, com endpoint de consulta cronológica `GET /requests/{id}/history`.
-- [ ] Integração com a interface web.
+- [x] Interface Web integrada (Front-End) atendendo a 100% dos requisitos obrigatórios e funcionalidades opcionais do edital.
 
 ---
 

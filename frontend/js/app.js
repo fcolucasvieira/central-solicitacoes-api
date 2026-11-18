@@ -1,6 +1,13 @@
 import { getAuthToken, getCurrentUser, clearAuthSession } from './api.js';
 import { initAuth } from './auth.js';
-import { loadCategories, loadRequests, initFiltersAndPagination, initRequestModal } from './requests.js';
+import { 
+    loadCategories, 
+    loadRequests, 
+    initFiltersAndPagination, 
+    initRequestModal,
+    initTableActions,
+    initHistoryModal
+} from './requests.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const token = getAuthToken();
@@ -26,18 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 1. Carrega categorias dinâmicas nos selects
         loadCategories();
 
-        // 2. Inicializa os filtros e a paginação
         initFiltersAndPagination();
 
-        // 3. Inicializa o modal de cadastro passando o callback para recarregar a tabela
         initRequestModal(() => {
             loadRequests();
         });
 
-        // 4. Carrega a listagem inicial de solicitações do Back-End
+        initTableActions();
+
+        initHistoryModal();
+
         loadRequests();
 
         console.log('Sessão ativa encontrada para:', user.email);
