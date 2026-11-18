@@ -5,47 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Central de Solicitações | Loading Desenvolvimento Jr.</title>
 
-  <!-- Favicon oficial da Loading -->
   <link rel="icon" type="image/svg+xml" href="assets/icone_com_fundo.svg">
 
-  <!-- Estilos e Design System -->
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- =========================================================================
-       1. SEÇÃO DE AUTENTICAÇÃO (Login / Registro)
-       ========================================================================= -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Autenticação -->
   <section id="auth-section" class="auth-wrapper">
     <div class="auth-card">
       
-      <!-- Cabeçalho com o logo da Loading -->
       <header class="auth-header">
         <img src="assets/logo_principal.svg" alt="Loading Desenvolvimento Jr." class="auth-logo">
         <h1 class="auth-title">Central de Solicitações</h1>
         <p class="auth-subtitle">Acesse o sistema interno para registrar e acompanhar demandas</p>
       </header>
 
-      <!-- Alternador de Abas: Entrar / Criar Conta -->
       <div class="auth-tabs" role="tablist">
         <button id="tab-login" class="tab-btn active" type="button" role="tab">Entrar</button>
         <button id="tab-register" class="tab-btn" type="button" role="tab">Criar Conta</button>
       </div>
 
-      <!-- Caixa de Feedback (Alertas de erro ou sucesso) -->
       <div id="auth-alert" class="alert" role="alert"></div>
 
-      <!-- Formulário de Login -->
       <form id="login-form" class="auth-form">
         <div class="form-group">
-          <label for="login-email" class="form-label">E-mail corporativo</label>
+          <label for="login-email" class="form-label">E-mail</label>
           <input 
             type="email" 
             id="login-email" 
             class="form-input" 
-            placeholder="seu.email@empresa.com" 
+            placeholder="seu-email@empresa.com"
             required
             autocomplete="email"
           >
@@ -63,10 +57,9 @@
           >
         </div>
 
-        <button type="submit" class="btn btn-primary">Entrar no Sistema</button>
+        <button type="submit" class="btn btn-primary">Entrar</button>
       </form>
 
-      <!-- Formulário de Registro (Criar Conta) -->
       <form id="register-form" class="auth-form hidden">
         <div class="form-group">
           <label for="reg-name" class="form-label">Nome completo</label>
@@ -86,7 +79,7 @@
             type="email" 
             id="reg-email" 
             class="form-input" 
-            placeholder="seu.email@empresa.com" 
+            placeholder="seu-email@empresa.com"
             required
             autocomplete="email"
           >
@@ -98,7 +91,7 @@
             type="password" 
             id="reg-password" 
             class="form-input" 
-            placeholder="Crie uma senha (mínimo 8 caracteres)" 
+            placeholder="Crie uma senha (mínimo 8 caracteres)"
             required
             minlength="8"
             autocomplete="new-password"
@@ -111,12 +104,9 @@
     </div>
   </section>
 
-  <!-- =========================================================================
-       2. SEÇÃO DA CENTRAL DE SOLICITAÇÕES (Dashboard Principal)
-       ========================================================================= -->
-  <main id="main-app" class="hidden">
+  <!-- Central de Solicitações -->
+       <main id="main-app" class="hidden">
     
-    <!-- Barra de Navegação Superior (Header) -->
     <header class="navbar">
       <div class="navbar-brand">
         <img src="assets/icone_com_fundo.svg" alt="Loading Icon" class="navbar-icon">
@@ -132,10 +122,8 @@
       </div>
     </header>
 
-    <!-- Conteúdo Principal do Dashboard -->
     <div class="dashboard-container">
       
-      <!-- 1. Barra de Ações do Topo -->
       <div class="dashboard-header">
         <div>
           <h1 class="dashboard-title">Demandas & Solicitações</h1>
@@ -146,11 +134,9 @@
         </button>
       </div>
 
-      <!-- 2. Barra de Filtros (RF03 + Busca Textual) -->
       <section class="filters-card">
         <div class="filters-grid">
           
-          <!-- Filtro de Busca Textual -->
           <div class="filter-group filter-search">
             <label for="filter-title" class="form-label">Buscar por título</label>
             <input 
@@ -161,7 +147,6 @@
             >
           </div>
 
-          <!-- Filtro por Status -->
           <div class="filter-group">
             <label for="filter-status" class="form-label">Status</label>
             <select id="filter-status" class="form-select">
@@ -172,7 +157,6 @@
             </select>
           </div>
 
-          <!-- Filtro por Prioridade -->
           <div class="filter-group">
             <label for="filter-priority" class="form-label">Prioridade</label>
             <select id="filter-priority" class="form-select">
@@ -183,7 +167,6 @@
             </select>
           </div>
 
-          <!-- Filtro por Categoria (carregado dinamicamente via GET /categories) -->
           <div class="filter-group">
             <label for="filter-category" class="form-label">Categoria</label>
             <select id="filter-category" class="form-select">
@@ -191,7 +174,6 @@
             </select>
           </div>
 
-          <!-- Ação: Limpar Filtros -->
           <div class="filter-actions">
             <button id="btn-clear-filters" class="btn btn-secondary" type="button" title="Limpar todos os filtros">
               Limpar
@@ -201,7 +183,6 @@
         </div>
       </section>
 
-      <!-- 3. Tabela de Listagem de Solicitações (RF02) -->
       <section class="table-card">
         <div class="table-responsive">
           <table class="data-table">
@@ -212,29 +193,25 @@
                 <th>Prioridade</th>
                 <th>Status</th>
                 <th>Criado em</th>
-                <th style="text-align: right;">Ações</th>
+                <th style="text-align: center; width: 220px;">Ações & Fluxo</th>
               </tr>
             </thead>
             <tbody id="requests-table-body">
-              <!-- As linhas <tr> serão injetadas pelo JavaScript aqui -->
             </tbody>
           </table>
         </div>
 
-        <!-- Estado de Carregamento (Loading State) -->
         <div id="table-loading" class="table-state hidden">
           <div class="spinner"></div>
           <p>Carregando solicitações...</p>
         </div>
 
-        <!-- Estado Vazio (Empty State) -->
         <div id="table-empty" class="table-state hidden">
           <img src="assets/mascote.svg" alt="Sem solicitações" class="empty-state-img">
           <h3>Nenhuma solicitação encontrada</h3>
           <p>Não há solicitações cadastradas ou nenhum item bateu com os filtros aplicados.</p>
         </div>
 
-        <!-- Rodapé com Paginação -->
         <div class="pagination-footer">
           <span id="pagination-info" class="pagination-info">Mostrando 0 de 0</span>
           <div class="pagination-buttons">
@@ -247,10 +224,7 @@
 
     </div>
 
-    <!-- =======================================================================
-         4. MODAL DE CADASTRO DE SOLICITAÇÃO (RF01)
-         Inicia oculto com a classe .hidden
-         ======================================================================= -->
+    <!-- Cadastro de Solicitação -->
     <div id="modal-new-request" class="modal-overlay hidden" role="dialog" aria-modal="true">
       <div class="modal-card">
         
@@ -262,7 +236,6 @@
         <form id="form-new-request" class="modal-body">
           <div id="modal-alert" class="alert" role="alert"></div>
 
-          <!-- Título -->
           <div class="form-group">
             <label for="req-title" class="form-label">Título da demanda *</label>
             <input 
@@ -275,7 +248,6 @@
             >
           </div>
 
-          <!-- Categoria e Prioridade em 2 Colunas -->
           <div class="form-row">
             <div class="form-group">
               <label for="req-category" class="form-label">Categoria *</label>
@@ -295,7 +267,6 @@
             </div>
           </div>
 
-          <!-- Descrição Detalhada -->
           <div class="form-group">
             <label for="req-description" class="form-label">Descrição detalhada *</label>
             <textarea 
@@ -316,9 +287,37 @@
       </div>
     </div>
 
+    <!-- Histórico de mudanças de status -->
+    <div id="modal-history" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card modal-card-lg">
+        
+        <header class="modal-header">
+          <div>
+            <h2 class="modal-title">Histórico de Transições</h2>
+            <span id="history-modal-subtitle" class="modal-subtitle"></span>
+          </div>
+          <button id="btn-close-history-modal" class="modal-close" type="button" aria-label="Fechar">&times;</button>
+        </header>
+
+        <div class="modal-body">
+          <div id="history-loading" class="table-state hidden" style="padding: 2rem;">
+            <div class="spinner"></div>
+            <p>Carregando histórico...</p>
+          </div>
+
+          <div id="history-timeline" class="timeline-container">
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button id="btn-close-history" class="btn btn-secondary" type="button">Fechar</button>
+        </footer>
+
+      </div>
+    </div>
+
   </main>
 
-  <!-- Script principal como Módulo ES6 -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
