@@ -228,6 +228,34 @@ A tabela abaixo sintetiza os principais endpoints disponibilizados pela API:
 
 ---
 
+## Deploy e Containerização (Docker)
+
+A aplicação conta com suporte completo para execução em containers e deploy automatizado em plataformas de nuvem (PaaS como Render ou Railway).
+
+### Arquitetura de Produção:
+- **Spring Profile `prod`:** Ativado via `application-prod.yaml`, aceita porta dinâmica (`$PORT`), conexões gerenciadas (`$DATABASE_URL`) e pool HikariCP dimensionado.
+- **Dockerfile Multi-Stage:** Utiliza a imagem oficial Eclipse Temurin para compilação com Maven Wrapper e empacotamento em runtime JRE leve, rodando com usuário sem privilégios de root (`appuser`).
+
+### Como construir e rodar a imagem Docker localmente:
+
+1. **Construir a imagem da API:**
+   ```bash
+   docker build -t central-solicitacoes-api .
+   ```
+
+2. **Executar a API conectada ao banco local:**
+   ```bash
+   docker run -p 8080:8080 --name central-api \
+     -e POSTGRES_DB=central_solicitacoes \
+     -e POSTGRES_USER=postgres \
+     -e POSTGRES_PASSWORD=sua_senha \
+     -e DB_HOST=host.docker.internal \
+     -e JWT_SECRET_KEY=sua_chave_secreta_com_no_minimo_32_caracteres \
+     central-solicitacoes-api
+   ```
+
+---
+
 ## Autor
 
 **Lucas Vieira**:
