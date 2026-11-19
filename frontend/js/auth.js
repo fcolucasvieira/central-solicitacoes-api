@@ -39,8 +39,8 @@ export function initAuth() {
                 body: JSON.stringify({ email, password })
             });
 
-            // O Back-End devolve accessToken. Passamos o e-mail como fallback
-            setAuthSession(response.accessToken, email);
+            // O Back-End devolve accessToken e name. Passamos como parâmetros
+            setAuthSession(response.accessToken, email, response.name);
 
             showAlert('Login realizado com sucesso! Entrando...', 'success');
 
