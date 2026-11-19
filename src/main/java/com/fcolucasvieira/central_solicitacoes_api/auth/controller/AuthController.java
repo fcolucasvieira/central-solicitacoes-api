@@ -4,6 +4,7 @@ import com.fcolucasvieira.central_solicitacoes_api.auth.dto.AuthResponse;
 import com.fcolucasvieira.central_solicitacoes_api.auth.dto.LoginRequest;
 import com.fcolucasvieira.central_solicitacoes_api.auth.dto.RegisterRequest;
 import com.fcolucasvieira.central_solicitacoes_api.auth.service.AuthService;
+import com.fcolucasvieira.central_solicitacoes_api.user.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,17 +28,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthService authService;
 
-    @Operation(summary = "Registrar usuário", description = "Cria uma nova conta de usuário e retorna um token JWT.")
+    @Operation(summary = "Registrar usuário", description = "Cria uma nova conta de usuário no sistema.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Usuário registrado com sucesso.",
-                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos.", content = @Content),
             @ApiResponse(responseCode = "409", description = "E-mail já cadastrado.", content = @Content)
     })
     @SecurityRequirements
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+        UserResponse response = authService.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

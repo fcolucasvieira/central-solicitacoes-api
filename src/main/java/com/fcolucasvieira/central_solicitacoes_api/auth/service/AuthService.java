@@ -5,6 +5,7 @@ import com.fcolucasvieira.central_solicitacoes_api.auth.dto.LoginRequest;
 import com.fcolucasvieira.central_solicitacoes_api.auth.dto.RegisterRequest;
 import com.fcolucasvieira.central_solicitacoes_api.exception.ResourceAlreadyExistsException;
 import com.fcolucasvieira.central_solicitacoes_api.jwt.JwtService;
+import com.fcolucasvieira.central_solicitacoes_api.user.dto.UserResponse;
 import com.fcolucasvieira.central_solicitacoes_api.user.entity.User;
 import com.fcolucasvieira.central_solicitacoes_api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public UserResponse register(RegisterRequest request) {
         boolean emailExists = userRepository.existsByEmail(request.email());
 
         if (emailExists) {
@@ -36,9 +37,7 @@ public class AuthService {
         User user = new User(request.name(), request.email(), passwordHash);
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user);
-
-        return AuthResponse.from(token);
+        return UserResponse.from(user);
     }
 
     @Transactional(readOnly = true)
@@ -50,6 +49,6 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
 
-        return AuthResponse.from(token);
+        return AuthResponse.from(token, user.getName());
     }
 }
