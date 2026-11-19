@@ -17,6 +17,7 @@ public record CreateRequestRequest(
 
         @Schema(description = "Descrição detalhada da solicitação", example = "O aparelho do bloco B sala 3 não está refrigerando.")
         @NotBlank(message = "A descrição é obrigatória.")
+        @Size(max = 1000, message = "A descrição não pode exceder 1000 caracteres.")
         String description,
 
         @Schema(description = "Identificador único da categoria existente e ativa", example = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")

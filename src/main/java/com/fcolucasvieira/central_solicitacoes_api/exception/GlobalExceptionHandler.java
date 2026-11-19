@@ -3,6 +3,7 @@ package com.fcolucasvieira.central_solicitacoes_api.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -87,6 +88,17 @@ public class GlobalExceptionHandler {
                 "O parâmetro '" + ex.getName() + "' recebeu um valor com formato inválido."
         );
         detail.setTitle("Parâmetro de requisição inválido");
+        detail.setProperty("timestamp", Instant.now());
+        return detail;
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ProblemDetail handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                "O recurso foi modificado simultaneamente por outra requisição. Atualize os dados e tente novamente."
+        );
+        detail.setTitle("Conflito de concorrência");
         detail.setProperty("timestamp", Instant.now());
         return detail;
     }

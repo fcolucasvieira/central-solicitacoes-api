@@ -8,9 +8,12 @@ public record AuthResponse(
         String accessToken,
 
         @Schema(description = "Tipo do token. Sempre 'Bearer'.", example = "Bearer")
-        String tokenType
+        String tokenType,
+
+        @Schema(description = "Nome do usuário.", example = "Lucas Vieira")
+        String name
 ) {
-    public static AuthResponse from(String accessToken) {
-        return new AuthResponse(accessToken, "Bearer");
+    public static AuthResponse from(String accessToken, String name) {
+        return new AuthResponse(accessToken, "Bearer", name);
     }
 }

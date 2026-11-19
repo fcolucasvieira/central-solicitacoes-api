@@ -39,6 +39,9 @@ public class Request {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Version
+    private Long version;
+
     protected Request() {}
 
     public Request(String title, String description, Category category, Priority priority) {
