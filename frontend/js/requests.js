@@ -199,6 +199,10 @@ export function initTableActions() {
         showToast(error.message, 'danger');
         btnStatus.disabled = false;
         btnStatus.textContent = nextStatus === 'EM_ANDAMENTO' ? 'Iniciar' : 'Concluir';
+        // Em caso de erro 409 (concorrência ou salto de status), recarrega os dados para sincronizar a tela
+        if (error.status === 409) {
+          loadRequests();
+        }
       }
       return;
     }
