@@ -1,6 +1,6 @@
 const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:8080"
-    : "https://SEU_DOMINIO_DE_PRODUCAO_AQUI.com";
+    : "https://central-solicitacoes-api.onrender.com";
 
 export function parseJwt(token) {
     try {
