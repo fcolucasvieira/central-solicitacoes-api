@@ -9,11 +9,13 @@ import jakarta.validation.constraints.Size;
 public record RegisterRequest(
         @Schema(description = "Nome completo do usuário.", example = "Lucas Vieira")
         @NotBlank
+        @Size(max = 100, message = "O nome do usuário não pode exceder 100 caracteres.")
         String name,
 
         @Schema(description = "E-mail do usuário. Deve ser único no sistema.", example = "lucas@email.com")
         @Email(message = "E-mail com formato inválido.")
         @NotBlank(message = "E-mail é obrigatório.")
+        @Size(max = 150, message = "O e-mail do usuário não pode exceder 150 caracteres.")
         String email,
 
         @Schema(description = "Senha do usuário. Mínimo de 8 caracteres.", example = "senha@123")

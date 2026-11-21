@@ -198,25 +198,61 @@ A aplicação conta com uma interface web moderna, responsiva e desenvolvida com
 
 ---
 
-## Funcionalidades
+## Tratamento de Concorrência (Lock Otimista)
 
-O projeto está concluído. Sua estrutura contempla:
+Para assegurar a consistência dos dados e a integridade das transições de status em cenários de requisições simultâneas, a aplicação adota **bloqueio otimista (*Optimistic Locking*)**:
 
-- [x] Configuração do PostgreSQL com Docker Compose.
-- [x] Configuração de conexão com o banco por variáveis de ambiente.
-- [x] Versionamento do schema com Flyway.
-- [x] Modelagem inicial das entidades e relacionamentos.
-- [x] Definição dos enums de prioridade e status.
-- [x] Documentação interativa da API com Swagger / OpenAPI.
-- [x] Módulo de Categorias (`category`): criação, consulta por ID, listagem paginada e exclusão lógica.
-- [x] Testes unitários para a camada de serviço do módulo de Categorias (`CategoryServiceTest`).
-- [x] Módulo de Solicitações (`request`): cadastro com status inicial `ABERTA`, consulta por ID, listagem paginada com filtros dinâmicos via Specifications e controle do fluxo de transição de status (`ABERTA → EM_ANDAMENTO → CONCLUIDA`).
-- [x] Testes unitários para a camada de serviço do módulo de Solicitações (`RequestServiceTest`).
-- [x] Tratamento global de exceções com `@RestControllerAdvice` e respostas padronizadas via `ProblemDetail` (RFC 7807).
-- [x] Módulo de autenticação (`auth`): registro de usuário e login com geração de token JWT (JJWT + Spring Security).
-- [x] Endpoints protegidos por autenticação Bearer Token (JWT stateless via `JwtAuthenticationFilter`).
-- [x] Histórico de status das solicitações (`requests_status_history`): registro automático do usuário autenticado e do status em cada criação e transição, com endpoint de consulta cronológica `GET /requests/{id}/history`.
-- [x] Interface Web integrada (Front-End) atendendo a 100% dos requisitos obrigatórios e funcionalidades opcionais do edital.
+- **Mecanismo:** A entidade `Request` possui um atributo `@Version private Long version`, mapeado para a coluna `version` gerenciada no schema via migração do Flyway (`V3`).
+- **Comportamento Concorrente:** Caso duas instâncias ou usuários tentem atualizar a mesma solicitação simultaneamente, o Hibernate detecta o conflito de versão e lança a exceção `ObjectOptimisticLockingFailureException`.
+- **Tratamento Global:** A exceção é capturada pelo `GlobalExceptionHandler` e devolvida com status HTTP `409 Conflict`, no padrão RFC 7807 (`ProblemDetail`), impedindo sobrescrita inadvertida e garantindo feedback transparente para que o cliente recarregue o recurso.
+
+---
+
+## Endpoints e Funcionalidades da API
+
+A tabela abaixo sintetiza os principais endpoints disponibilizados pela API:
+
+| Método | Endpoint | Módulo | Descrição | Autenticação |
+| :--- | :--- | :--- | :--- | :---: |
+| `POST` | `/auth/register` | Auth | Cadastra um novo usuário no sistema e retorna seus dados | Não |
+| `POST` | `/auth/login` | Auth | Autentica um usuário existente e emite o token JWT de acesso | Não |
+| `POST` | `/categories` | Categorias | Cria uma nova categoria de solicitação | Sim (Bearer) |
+| `GET` | `/categories` | Categorias | Lista categorias ativas de forma paginada | Sim (Bearer) |
+| `GET` | `/categories/{id}` | Categorias | Consulta os detalhes de uma categoria por ID | Sim (Bearer) |
+| `DELETE` | `/categories/{id}` | Categorias | Realiza a exclusão lógica (desativação) de uma categoria | Sim (Bearer) |
+| `POST` | `/requests` | Solicitações | Registra uma nova solicitação com status inicial `ABERTA` | Sim (Bearer) |
+| `GET` | `/requests` | Solicitações | Lista solicitações com paginação, ordenação decrescente e filtros combináveis | Sim (Bearer) |
+| `GET` | `/requests/{id}` | Solicitações | Consulta os detalhes de uma solicitação por ID | Sim (Bearer) |
+| `PATCH` | `/requests/{id}/status` | Solicitações | Executa a transição estrita de status (`ABERTA → EM_ANDAMENTO → CONCLUIDA`) | Sim (Bearer) |
+| `GET` | `/requests/{id}/history` | Solicitações | Retorna a linha do tempo com o histórico de transições e responsáveis | Sim (Bearer) |
+
+---
+
+## Deploy e Containerização (Docker)
+
+A aplicação conta com suporte completo para execução em containers e deploy automatizado em plataformas de nuvem (PaaS como Render ou Railway).
+
+### Arquitetura de Produção:
+- **Spring Profile `prod`:** Ativado via `application-prod.yaml`, aceita porta dinâmica (`$PORT`), conexões gerenciadas (`$DATABASE_URL`) e pool HikariCP dimensionado.
+- **Dockerfile Multi-Stage:** Utiliza a imagem oficial Eclipse Temurin para compilação com Maven Wrapper e empacotamento em runtime JRE leve, rodando com usuário sem privilégios de root (`appuser`).
+
+### Como construir e rodar a imagem Docker localmente:
+
+1. **Construir a imagem da API:**
+   ```bash
+   docker build -t central-solicitacoes-api .
+   ```
+
+2. **Executar a API conectada ao banco local:**
+   ```bash
+   docker run -p 8080:8080 --name central-api \
+     -e POSTGRES_DB=central_solicitacoes \
+     -e POSTGRES_USER=postgres \
+     -e POSTGRES_PASSWORD=sua_senha \
+     -e DB_HOST=host.docker.internal \
+     -e JWT_SECRET_KEY=sua_chave_secreta_com_no_minimo_32_caracteres \
+     central-solicitacoes-api
+   ```
 
 ---
 

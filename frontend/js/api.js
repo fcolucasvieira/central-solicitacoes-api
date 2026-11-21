@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:8080"
+    : "https://central-solicitacoes-api.onrender.com";
 
 export function parseJwt(token) {
     try {
@@ -26,7 +28,7 @@ export function getAuthToken() {
     return token;
 }
 
-export function setAuthSession(accessToken, emailFallback = '') {
+export function setAuthSession(accessToken, emailFallback = '', nameFallback = '') {
     localStorage.setItem("token", accessToken);
 
     const payload = parseJwt(accessToken);
@@ -34,7 +36,7 @@ export function setAuthSession(accessToken, emailFallback = '') {
 
     const user = {
         email: email,
-        name: email ? email.split('@')[0] : 'Usuário'
+        name: nameFallback || (email ? email.split('@')[0] : 'Usuário')
     };
 
     localStorage.setItem("user", JSON.stringify(user));
@@ -80,6 +82,12 @@ export async function apiFetch(endpoint, options = {}) {
         const response = await fetch(url, config);
 
         if (response.status === 204) {
+            return null;
+        }
+
+        if (response.status === 401 && !endpoint.startsWith('/auth/')) {
+            clearAuthSession();
+            window.location.reload();
             return null;
         }
 

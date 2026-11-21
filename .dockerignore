@@ -1,0 +1,11 @@
+target/
+.idea/
+*.iml
+.git/
+.gitignore
+.env
+loading_assets/
+loading_assets_png/
+docs/
+*.md
+frontend/

@@ -117,7 +117,10 @@
       </div>
 
       <div class="navbar-user">
-        <span id="user-greeting" class="user-greeting"></span>
+        <div class="user-profile-badge">
+          <img src="assets/icone_minimalista_mascote.svg" alt="Avatar Mascote Loading" class="navbar-avatar">
+          <span id="user-greeting" class="user-greeting"></span>
+        </div>
         <button id="logout-btn" class="btn btn-secondary btn-sm" type="button">Sair</button>
       </div>
     </header>
@@ -202,7 +205,7 @@
         </div>
 
         <div id="table-loading" class="table-state hidden">
-          <div class="spinner"></div>
+          <img src="assets/logo_alternativa_roxa_com_pontinhos.svg" alt="Carregando..." class="loading-logo-state">
           <p>Carregando solicitações...</p>
         </div>
 
@@ -244,7 +247,7 @@
               class="form-input" 
               placeholder="Ex: Falha na conexão de rede do 2º andar" 
               required
-              maxlength="100"
+              maxlength="150"
             >
           </div>
 
@@ -301,7 +304,7 @@
 
         <div class="modal-body">
           <div id="history-loading" class="table-state hidden" style="padding: 2rem;">
-            <div class="spinner"></div>
+            <img src="assets/logo_alternativa_roxa_com_pontinhos.svg" alt="Carregando..." class="loading-logo-state">
             <p>Carregando histórico...</p>
           </div>
 
