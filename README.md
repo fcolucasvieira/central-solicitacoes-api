@@ -83,7 +83,7 @@ src/
 │   └── resources/
 │       ├── db/
 │       │   └── migration/
-│       └── application.yaml/
+│       └── application.yaml
 │
 └── test/
 ```
